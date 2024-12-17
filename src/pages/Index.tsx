@@ -1,11 +1,118 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React, { useState, useEffect } from 'react';
+import { toast } from "sonner";
+import WordGrid from '@/components/WordGrid';
+import Keyboard from '@/components/Keyboard';
+import { getWordOfTheDay } from '@/data/propertyWords';
+import { Building2 } from "lucide-react";
 
 const Index = () => {
+  const [wordOfTheDay, setWordOfTheDay] = useState('');
+  const [currentGuess, setCurrentGuess] = useState('');
+  const [guesses, setGuesses] = useState<string[]>([]);
+  const [gameOver, setGameOver] = useState(false);
+  const [usedLetters, setUsedLetters] = useState<{
+    [key: string]: 'correct' | 'present' | 'absent' | undefined;
+  }>({});
+
+  useEffect(() => {
+    setWordOfTheDay(getWordOfTheDay());
+  }, []);
+
+  const updateUsedLetters = (guess: string) => {
+    const newUsedLetters = { ...usedLetters };
+    
+    guess.split('').forEach((letter, i) => {
+      if (letter === wordOfTheDay[i]) {
+        newUsedLetters[letter] = 'correct';
+      } else if (wordOfTheDay.includes(letter)) {
+        if (newUsedLetters[letter] !== 'correct') {
+          newUsedLetters[letter] = 'present';
+        }
+      } else {
+        if (!newUsedLetters[letter]) {
+          newUsedLetters[letter] = 'absent';
+        }
+      }
+    });
+
+    setUsedLetters(newUsedLetters);
+  };
+
+  const onKeyPress = (key: string) => {
+    if (gameOver) return;
+    if (currentGuess.length < 5) {
+      setCurrentGuess(currentGuess + key);
+    }
+  };
+
+  const onEnter = () => {
+    if (gameOver) return;
+    if (currentGuess.length !== 5) {
+      toast.error("Word must be 5 letters long");
+      return;
+    }
+
+    const newGuesses = [...guesses, currentGuess];
+    setGuesses(newGuesses);
+    updateUsedLetters(currentGuess);
+
+    if (currentGuess === wordOfTheDay) {
+      toast.success("Congratulations! You've won!");
+      setGameOver(true);
+    } else if (newGuesses.length >= 6) {
+      toast.error(`Game Over! The word was ${wordOfTheDay}`);
+      setGameOver(true);
+    }
+
+    setCurrentGuess('');
+  };
+
+  const onDelete = () => {
+    if (gameOver) return;
+    setCurrentGuess(currentGuess.slice(0, -1));
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (gameOver) return;
+    if (e.key === 'Enter') {
+      onEnter();
+    } else if (e.key === 'Backspace') {
+      onDelete();
+    } else if (/^[A-Za-z]$/.test(e.key)) {
+      onKeyPress(e.key.toUpperCase());
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [currentGuess, gameOver]);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-2xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 flex items-center justify-center gap-2">
+            <Building2 className="h-8 w-8" />
+            Property Wordle
+          </h1>
+          <p className="text-gray-600 mt-2">Guess the property-related word!</p>
+        </div>
+
+        <WordGrid
+          guesses={guesses}
+          currentGuess={currentGuess}
+          wordOfTheDay={wordOfTheDay}
+        />
+        
+        <Keyboard
+          onKeyPress={onKeyPress}
+          onEnter={onEnter}
+          onDelete={onDelete}
+          usedLetters={usedLetters}
+        />
       </div>
     </div>
   );
