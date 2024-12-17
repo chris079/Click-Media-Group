@@ -33,10 +33,9 @@ const WordGrid: React.FC<WordGridProps> = ({ guesses, currentGuess, wordOfTheDay
   }, [gameOver, guesses, wordOfTheDay]);
 
   const getCellClass = (letter: string, index: number, rowIndex: number) => {
-    const base = "w-14 h-14 border-2 flex items-center justify-center text-2xl font-bold rounded transition-colors duration-500";
+    const base = "w-16 h-16 border-2 flex items-center justify-center text-3xl font-bold rounded transition-colors duration-500";
     if (!letter) return `${base} border-gray-300`;
     
-    // Only apply colors to completed rows
     if (rowIndex < guesses.length) {
       if (letter === wordOfTheDay[index]) {
         return `${base} border-green-500 bg-green-500 text-white`;
@@ -51,9 +50,9 @@ const WordGrid: React.FC<WordGridProps> = ({ guesses, currentGuess, wordOfTheDay
   };
 
   return (
-    <div className="grid gap-2 mx-auto mb-8">
+    <div className="grid gap-2 mx-auto mb-8 justify-center">
       {guesses.map((guess, i) => (
-        <div key={i} className="flex gap-2">
+        <div key={i} className="flex gap-2 justify-center">
           {guess.split('').map((letter, j) => (
             <div key={j} className={getCellClass(letter, j, i)}>
               {letter}
@@ -62,7 +61,7 @@ const WordGrid: React.FC<WordGridProps> = ({ guesses, currentGuess, wordOfTheDay
         </div>
       ))}
       {guesses.length < 6 && (
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-center">
           {currentGuess.split('').concat(Array(5 - currentGuess.length).fill('')).map((letter, i) => (
             <div key={i} className={getCellClass(letter, i, guesses.length)}>
               {letter}
@@ -71,7 +70,7 @@ const WordGrid: React.FC<WordGridProps> = ({ guesses, currentGuess, wordOfTheDay
         </div>
       )}
       {empties.map((_, i) => (
-        <div key={i + guesses.length + 1} className="flex gap-2">
+        <div key={i + guesses.length + 1} className="flex gap-2 justify-center">
           {Array(5).fill('').map((_, j) => (
             <div key={j} className={getCellClass('', j, i + guesses.length + 1)}>
               {''}
