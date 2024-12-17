@@ -60,7 +60,6 @@ const Index = () => {
       toast.success("Congratulations! You've won!");
       setGameOver(true);
     } else if (newGuesses.length >= 6) {
-      toast.error(`Game Over! The word was ${wordOfTheDay}`);
       setGameOver(true);
     }
 
@@ -71,24 +70,6 @@ const Index = () => {
     if (gameOver) return;
     setCurrentGuess(currentGuess.slice(0, -1));
   };
-
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (gameOver) return;
-    if (e.key === 'Enter') {
-      onEnter();
-    } else if (e.key === 'Backspace') {
-      onDelete();
-    } else if (/^[A-Za-z]$/.test(e.key)) {
-      onKeyPress(e.key.toUpperCase());
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [currentGuess, gameOver]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -105,6 +86,7 @@ const Index = () => {
           guesses={guesses}
           currentGuess={currentGuess}
           wordOfTheDay={wordOfTheDay}
+          gameOver={gameOver}
         />
         
         <Keyboard
