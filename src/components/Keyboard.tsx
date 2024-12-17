@@ -1,5 +1,4 @@
 import React from 'react';
-import { Button } from "@/components/ui/button";
 
 interface KeyboardProps {
   onKeyPress: (key: string) => void;
@@ -10,7 +9,12 @@ interface KeyboardProps {
   };
 }
 
-const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, onEnter, onDelete, usedLetters }) => {
+const Keyboard: React.FC<KeyboardProps> = ({
+  onKeyPress,
+  onEnter,
+  onDelete,
+  usedLetters,
+}) => {
   const rows = [
     ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
     ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
@@ -18,39 +22,40 @@ const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, onEnter, onDelete, used
   ];
 
   const getKeyClass = (key: string) => {
-    if (key === 'ENTER' || key === '⌫') return '';
+    const baseClass = "px-2 py-4 rounded font-semibold text-sm sm:text-base transition-colors";
+    if (key === 'ENTER' || key === '⌫') {
+      return `${baseClass} bg-gray-200 hover:bg-gray-300 text-gray-700 flex-grow`;
+    }
+    
     const status = usedLetters[key];
     switch (status) {
       case 'correct':
-        return 'bg-green-500 text-white hover:bg-green-600';
+        return `${baseClass} bg-green-500 text-white`;
       case 'present':
-        return 'bg-yellow-500 text-white hover:bg-yellow-600';
+        return `${baseClass} bg-yellow-500 text-white`;
       case 'absent':
-        return 'bg-gray-400 text-white hover:bg-gray-500';
+        return `${baseClass} bg-gray-400 text-white`;
       default:
-        return 'bg-gray-200 hover:bg-gray-300';
+        return `${baseClass} bg-gray-200 hover:bg-gray-300 text-gray-700`;
     }
   };
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto p-2">
       {rows.map((row, i) => (
-        <div key={i} className="flex justify-center gap-1 my-1">
+        <div key={i} className="flex justify-center gap-1 mb-1">
           {row.map((key) => (
-            <Button
+            <button
               key={key}
               onClick={() => {
                 if (key === 'ENTER') onEnter();
                 else if (key === '⌫') onDelete();
                 else onKeyPress(key);
               }}
-              className={`${getKeyClass(key)} px-2 py-4 text-sm font-bold rounded ${
-                key === 'ENTER' ? 'px-4' : ''
-              }`}
-              variant="secondary"
+              className={getKeyClass(key)}
             >
               {key}
-            </Button>
+            </button>
           ))}
         </div>
       ))}

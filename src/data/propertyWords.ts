@@ -1,7 +1,17 @@
-// Initial set of property-related 5-letter words
+// Property-related 5-letter words for the game
 export const propertyWords = [
-  "HOUSE", "LEASE", "AGENT", "BRICK", "FLOOR", "PRICE", "TITLE", "ROOMS", "DEEDS", "BUYER",
-  "HOMES", "SALES", "BUILD", "PLOTS", "MANOR", "VILLA", "FLATS", "SHARE", "OWNED", "TOWER"
+  "AGENT", "ALARM", "APART", "ATTIC", "BANKS", "BLOCK", "BRICK", "BUILD", 
+  "CHAIN", "CHEAP", "CLEAN", "CLOSE", "COURT", "DEEDS", "DELTA", "DOORS", 
+  "DRIVE", "EAVES", "ELITE", "ENTRY", "FIXED", "FLOOR", "FRAME", "FRONT", 
+  "GATES", "GRAND", "GRANT", "GREEN", "GROSS", "GUIDE", "HALLS", "HANDY", 
+  "HOUSE", "INDEX", "LEASE", "LEVEL", "LIGHT", "LINKS", "LOANS", "MAJOR", 
+  "METRO", "MEWS", "NORTH", "OFFER", "OPEN", "ORDER", "OWNER", "PLACE", 
+  "PLAZA", "PRICE", "PRIME", "QUOTE", "RATES", "RENTS", "RIVER", "ROYAL", 
+  "SPACE", "STATE", "STOCK", "STORE", "STYLE", "SUITE", "TOWER", "VALUE", 
+  "URBAN", "ADDED", "SMART", "PITCH", "TRACK", "SCALE", "WORTH", "SITE", 
+  "HOMES", "COURT", "BLOCK", "FRAME", "PRICE", "SPACE", "VALUE", "SITE", 
+  "HOUSE", "OWNER", "PLACE", "RENTS", "METRO", "PRIME", "ELITE", "SMART", 
+  "GRAND"
 ];
 
 export const getWordOfTheDay = () => {

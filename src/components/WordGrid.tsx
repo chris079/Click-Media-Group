@@ -8,62 +8,51 @@ interface WordGridProps {
 
 const WordGrid: React.FC<WordGridProps> = ({ guesses, currentGuess, wordOfTheDay }) => {
   const empties = Array(6 - (guesses.length + 1)).fill('');
-  const currentGuessArray = currentGuess.split('').concat(Array(5 - currentGuess.length).fill(''));
-
-  const getLetterClass = (letter: string, index: number, word: string) => {
-    if (!letter) return "bg-gray-200 border-2 border-gray-300";
-    if (word === guesses[guesses.length - 1]) {
+  
+  const getCellClass = (letter: string, index: number, guess: string) => {
+    const base = "w-14 h-14 border-2 flex items-center justify-center text-2xl font-bold rounded";
+    if (!letter) return `${base} border-gray-300`;
+    
+    if (guess === guesses[guesses.length - 1]) {
       if (letter === wordOfTheDay[index]) {
-        return "bg-green-500 text-white border-2 border-green-600";
+        return `${base} border-green-500 bg-green-500 text-white`;
       }
       if (wordOfTheDay.includes(letter)) {
-        return "bg-yellow-500 text-white border-2 border-yellow-600";
+        return `${base} border-yellow-500 bg-yellow-500 text-white`;
       }
-      return "bg-gray-400 text-white border-2 border-gray-500";
+      return `${base} border-gray-400 bg-gray-400 text-white`;
     }
-    return "bg-gray-200 border-2 border-gray-300";
+    
+    return `${base} border-gray-300 bg-gray-100`;
   };
 
   return (
-    <div className="grid grid-rows-6 gap-2 mx-auto w-full max-w-sm p-4">
+    <div className="grid gap-2 mx-auto mb-8">
       {guesses.map((guess, i) => (
-        <div key={i} className="grid grid-cols-5 gap-2">
+        <div key={i} className="flex gap-2">
           {guess.split('').map((letter, j) => (
-            <div
-              key={j}
-              className={`w-full aspect-square flex items-center justify-center text-2xl font-bold rounded ${getLetterClass(
-                letter,
-                j,
-                guess
-              )}`}
-            >
+            <div key={j} className={getCellClass(letter, j, guess)}>
               {letter}
             </div>
           ))}
         </div>
       ))}
       {guesses.length < 6 && (
-        <div className="grid grid-cols-5 gap-2">
-          {currentGuessArray.map((letter, i) => (
-            <div
-              key={i}
-              className="w-full aspect-square flex items-center justify-center text-2xl font-bold bg-gray-200 border-2 border-gray-300 rounded"
-            >
+        <div className="flex gap-2">
+          {currentGuess.split('').concat(Array(5 - currentGuess.length).fill('')).map((letter, i) => (
+            <div key={i} className={getCellClass(letter, i, '')}>
               {letter}
             </div>
           ))}
         </div>
       )}
       {empties.map((_, i) => (
-        <div key={i} className="grid grid-cols-5 gap-2">
-          {Array(5)
-            .fill('')
-            .map((_, j) => (
-              <div
-                key={j}
-                className="w-full aspect-square flex items-center justify-center text-2xl font-bold bg-gray-200 border-2 border-gray-300 rounded"
-              />
-            ))}
+        <div key={i} className="flex gap-2">
+          {Array(5).fill('').map((_, j) => (
+            <div key={j} className={getCellClass('', j, '')}>
+              {''}
+            </div>
+          ))}
         </div>
       ))}
     </div>
