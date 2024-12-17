@@ -9,7 +9,7 @@ interface WordGridProps {
 }
 
 const WordGrid: React.FC<WordGridProps> = ({ guesses, currentGuess, wordOfTheDay, gameOver }) => {
-  const empties = Array(6 - (guesses.length + 1)).fill('');
+  const empties = Array(Math.max(0, 6 - (guesses.length + 1))).fill('');
   
   React.useEffect(() => {
     if (gameOver && guesses[guesses.length - 1] !== wordOfTheDay) {
