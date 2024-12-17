@@ -24,7 +24,7 @@ const Keyboard: React.FC<KeyboardProps> = ({
   const getKeyClass = (key: string) => {
     const baseClass = "px-2 py-4 rounded font-semibold text-sm sm:text-base transition-colors";
     if (key === 'ENTER' || key === '⌫') {
-      return `${baseClass} bg-gray-200 hover:bg-gray-300 text-gray-700 flex-grow`;
+      return `${baseClass} bg-gray-200 hover:bg-gray-300 text-gray-700 w-16`; // Reduced width for special keys
     }
     
     const status = usedLetters[key];

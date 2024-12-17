@@ -13,22 +13,7 @@ const WordGrid: React.FC<WordGridProps> = ({ guesses, currentGuess, wordOfTheDay
   
   React.useEffect(() => {
     if (gameOver && guesses[guesses.length - 1] !== wordOfTheDay) {
-      toast.error(`Good try! The word was ${wordOfTheDay}. Come back tomorrow!`, {
-        description: (
-          <div className="mt-2">
-            <p>Want to learn more about the property market?</p>
-            <a 
-              href="https://www.clicksocials.co.uk" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:text-blue-600 underline"
-            >
-              Click here to explore more
-            </a>
-          </div>
-        ),
-        duration: 5000,
-      });
+      toast.error(`Good try! The word was ${wordOfTheDay}. Sign up to continue playing!`);
     }
   }, [gameOver, guesses, wordOfTheDay]);
 
