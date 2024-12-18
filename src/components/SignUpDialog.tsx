@@ -76,9 +76,13 @@ const SignUpDialog = ({
           }
         ])
         .select()
-        .single();
+        .maybeSingle();
 
       if (profileError) throw profileError;
+      if (!profile) {
+        toast.error("Failed to create profile");
+        return;
+      }
 
       // Save score if game is complete
       if (currentScore !== undefined && word && profile && completionTime) {
