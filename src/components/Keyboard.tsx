@@ -22,9 +22,12 @@ const Keyboard: React.FC<KeyboardProps> = ({
   ];
 
   const getKeyClass = (key: string) => {
-    const baseClass = "px-2 py-3 rounded font-semibold text-sm transition-colors";
-    if (key === 'ENTER' || key === '⌫') {
-      return `${baseClass} bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs w-12`; // Reduced width and size for special keys
+    const baseClass = "px-2 py-3 rounded font-semibold text-sm transition-colors min-w-[2rem]";
+    if (key === 'ENTER') {
+      return `${baseClass} bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs min-w-[4rem]`;
+    }
+    if (key === '⌫') {
+      return `${baseClass} bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs min-w-[3rem]`;
     }
     
     const status = usedLetters[key];

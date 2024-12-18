@@ -14,13 +14,18 @@ const GameStatus = ({ gameOver, gameWon, wordOfTheDay }: GameStatusProps) => {
 
   if (!gameOver) return null;
 
+  const shareText = `I solved today's Property Wordle in ${gameWon ? 'success!' : 'X'}/6! The word was ${wordOfTheDay}. Can you beat my score?`;
+
   return (
-    <div className="text-center">
-      <p className={`text-2xl font-bold mt-4 ${gameWon ? 'text-green-500' : 'text-red-500'}`}>
+    <div className="text-center mb-4">
+      <p className={`text-2xl font-bold ${gameWon ? 'text-green-500' : 'text-red-500'}`}>
         {wordOfTheDay}
       </p>
-      <div className="flex justify-center gap-4 mt-6">
-        <Button onClick={() => shareToLinkedIn(`I solved today's Wordle in ${gameWon ? 'success!' : 'X'}/6! Can you beat my score?`)}>
+      <div className="flex justify-center gap-4 mt-4">
+        <Button onClick={() => {
+          navigator.clipboard.writeText(shareText);
+          shareToLinkedIn(shareText);
+        }}>
           Share on LinkedIn
         </Button>
         <Button onClick={() => navigate('/leaderboard')}>

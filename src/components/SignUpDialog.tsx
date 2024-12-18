@@ -21,6 +21,7 @@ const SignUpDialog = ({ open, onOpenChange, onSignUp }: SignUpDialogProps) => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     
     try {
       userSchema.parse({ email });
@@ -38,8 +39,8 @@ const SignUpDialog = ({ open, onOpenChange, onSignUp }: SignUpDialogProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" onOpenAutoFocus={(e) => e.preventDefault()}>
+    <Dialog open={open} onOpenChange={onOpenChange} modal>
+      <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Join the Leaderboard!</DialogTitle>
           <DialogDescription>
