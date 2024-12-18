@@ -2,12 +2,8 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import UsernameInput from './UsernameInput';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import SignUpForm from './signup/SignUpForm';
+import UpdatePrompt from './signup/UpdatePrompt';
 
 interface SignUpDialogProps {
   open: boolean;
@@ -160,70 +156,24 @@ const SignUpDialog = ({
         </DialogHeader>
 
         {showUpdatePrompt ? (
-          <div className="space-y-4">
-            <Alert>
-              <AlertDescription>
-                This email is already registered with the username "{existingUsername}". 
-                Would you like to update your username to "{username}"?
-              </AlertDescription>
-            </Alert>
-            <div className="flex gap-2">
-              <Button 
-                onClick={handleUpdateUsername} 
-                disabled={isSubmitting}
-                className="flex-1"
-              >
-                Yes, Update Username
-              </Button>
-              <Button 
-                onClick={() => setShowUpdatePrompt(false)} 
-                variant="outline"
-                className="flex-1"
-              >
-                No, Keep Current
-              </Button>
-            </div>
-          </div>
+          <UpdatePrompt
+            existingUsername={existingUsername}
+            newUsername={username}
+            onUpdate={handleUpdateUsername}
+            onCancel={() => setShowUpdatePrompt(false)}
+            isSubmitting={isSubmitting}
+          />
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <UsernameInput
-              value={username}
-              onChange={setUsername}
-              disabled={isSubmitting}
-            />
-            
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isSubmitting}
-                required
-              />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="terms"
-                checked={termsAccepted}
-                onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
-                disabled={isSubmitting}
-              />
-              <Label htmlFor="terms" className="text-sm">
-                I accept the terms and conditions
-              </Label>
-            </div>
-
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Saving...' : 'Save Score'}
-            </Button>
-          </form>
+          <SignUpForm
+            username={username}
+            setUsername={setUsername}
+            email={email}
+            setEmail={setEmail}
+            termsAccepted={termsAccepted}
+            setTermsAccepted={setTermsAccepted}
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+          />
         )}
       </DialogContent>
     </Dialog>
