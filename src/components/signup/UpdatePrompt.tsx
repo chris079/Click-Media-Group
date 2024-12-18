@@ -4,41 +4,30 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface UpdatePromptProps {
   existingUsername: string;
-  newUsername: string;
-  onUpdate: () => void;
-  onCancel: () => void;
+  onProceed: () => void;
   isSubmitting: boolean;
 }
 
 const UpdatePrompt = ({
   existingUsername,
-  newUsername,
-  onUpdate,
-  onCancel,
+  onProceed,
   isSubmitting
 }: UpdatePromptProps) => {
   return (
     <div className="space-y-4">
       <Alert>
         <AlertDescription>
-          This email is already registered with the username "{existingUsername}". 
-          Would you like to update your username to "{newUsername}"?
+          This email was previously used with the username "{existingUsername}". 
+          You can continue with your new username if you'd like.
         </AlertDescription>
       </Alert>
-      <div className="flex gap-2">
+      <div className="flex justify-center">
         <Button 
-          onClick={onUpdate} 
+          onClick={onProceed} 
           disabled={isSubmitting}
-          className="flex-1"
+          className="w-full"
         >
-          Yes, Update Username
-        </Button>
-        <Button 
-          onClick={onCancel} 
-          variant="outline"
-          className="flex-1"
-        >
-          No, Keep Current
+          Continue with New Username
         </Button>
       </div>
     </div>
