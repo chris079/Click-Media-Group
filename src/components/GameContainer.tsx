@@ -104,13 +104,13 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
       setGameWon(won);
       setGameOver(true);
       
-      if (won && !signedUp) {
+      if (!signedUp) {
         setShowSignUp(true);
-        toast.success("Congratulations! You've won!");
-      } else if (won) {
-        toast.success("Congratulations! You've won!");
-      } else {
-        toast.error(`Game Over! The word was ${wordOfTheDay}`);
+        if (won) {
+          toast.success("Congratulations! You've won!");
+        } else {
+          toast.error(`Game Over! The word was ${wordOfTheDay}`);
+        }
       }
     } else if (newGuesses.length >= 3 && !hasShownSignUpPrompt && !signedUp) {
       setShowSignUp(true);
