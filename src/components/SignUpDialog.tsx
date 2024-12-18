@@ -56,7 +56,14 @@ const SignUpDialog = ({
         .select()
         .maybeSingle();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        if (profileError.code === '23505') { // Unique violation error code
+          toast.error("This email is already registered. Please use another email.");
+          return false;
+        }
+        throw profileError;
+      }
+
       if (!profile) {
         toast.error("Failed to create profile");
         return false;
@@ -124,6 +131,11 @@ const SignUpDialog = ({
 
       const success = await createProfileAndScore();
       if (success) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
         toast.success("Score saved successfully!");
         onSuccess();
       }
