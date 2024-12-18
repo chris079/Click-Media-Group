@@ -50,8 +50,7 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
     return true;
   };
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newEmail = e.target.value;
+  const handleEmailChange = (newEmail: string) => {
     setEmail(newEmail);
     if (newEmail) {
       validateEmail(newEmail);
