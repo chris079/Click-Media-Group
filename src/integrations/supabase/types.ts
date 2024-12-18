@@ -13,23 +13,32 @@ export type Database = {
         Row: {
           created_at: string
           email: string
+          email_verified: boolean | null
           first_name: string | null
           id: string
           last_name: string | null
+          terms_accepted: boolean | null
+          username: string | null
         }
         Insert: {
           created_at?: string
           email: string
+          email_verified?: boolean | null
           first_name?: string | null
           id: string
           last_name?: string | null
+          terms_accepted?: boolean | null
+          username?: string | null
         }
         Update: {
           created_at?: string
           email?: string
+          email_verified?: boolean | null
           first_name?: string | null
           id?: string
           last_name?: string | null
+          terms_accepted?: boolean | null
+          username?: string | null
         }
         Relationships: []
       }
