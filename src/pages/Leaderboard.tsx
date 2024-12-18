@@ -95,13 +95,13 @@ const Leaderboard = () => {
                 className="text-right cursor-pointer"
                 onClick={() => requestSort('games_played')}
               >
-                Games Played {sortConfig?.key === 'games_played' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                Number of Games {sortConfig?.key === 'games_played' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
               </TableHead>
               <TableHead 
                 className="text-right cursor-pointer"
                 onClick={() => requestSort('avg_attempts')}
               >
-                Avg Attempts {sortConfig?.key === 'avg_attempts' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                Average Attempts {sortConfig?.key === 'avg_attempts' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
               </TableHead>
               <TableHead 
                 className="text-right cursor-pointer"
@@ -113,7 +113,7 @@ const Leaderboard = () => {
                 className="text-right cursor-pointer"
                 onClick={() => requestSort('best_score')}
               >
-                Best Score {sortConfig?.key === 'best_score' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                Best Attempts {sortConfig?.key === 'best_score' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
               </TableHead>
             </TableRow>
           </TableHeader>
