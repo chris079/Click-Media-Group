@@ -20,6 +20,7 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
   const [wordOfTheDay] = useState('HOUSE');
   const [showSignUp, setShowSignUp] = useState(false);
   const [signedUp, setSignedUp] = useState(false);
+  const [hasShownSignUpPrompt, setHasShownSignUpPrompt] = useState(false);
   const [usedLetters, setUsedLetters] = useState<{
     [key: string]: 'correct' | 'present' | 'absent' | undefined;
   }>({});
@@ -97,19 +98,21 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
     });
     setUsedLetters(newUsedLetters);
 
-    if (currentGuess === wordOfTheDay || newGuesses.length >= 6) {
-      const won = currentGuess === wordOfTheDay;
+    const won = currentGuess === wordOfTheDay;
+    
+    if (won || newGuesses.length >= 6) {
       setGameWon(won);
       setGameOver(true);
-      setShowSignUp(true);
       
       if (won) {
+        setShowSignUp(true);
         toast.success("Congratulations! You've won!");
       } else {
         toast.error(`Game Over! The word was ${wordOfTheDay}`);
       }
-    } else if (newGuesses.length >= 3 && !signedUp) {
+    } else if (newGuesses.length >= 3 && !hasShownSignUpPrompt && !signedUp) {
       setShowSignUp(true);
+      setHasShownSignUpPrompt(true);
     }
   };
 
