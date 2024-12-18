@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import UsernameInput from './UsernameInput';
 
 interface SignUpDialogProps {
   open: boolean;
@@ -26,7 +27,6 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
   const [activeTab, setActiveTab] = useState('signup');
 
   useEffect(() => {
-    // Check for existing session on mount
     checkExistingSession();
   }, []);
 
@@ -194,40 +194,44 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
   return (
     <Dialog 
       open={open} 
-      onOpenChange={() => {}} // Prevent dialog from being closed
+      onOpenChange={() => {}} 
       modal
     >
       <DialogContent 
-        className="sm:max-w-md" 
+        className="sm:max-w-md bg-[#1a1a1a] text-white border-[#333]" 
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Join the Game!</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-[#00ff00]">Join ClickSocials Wordle!</DialogTitle>
+          <DialogDescription className="text-gray-400">
             Sign up or log in to save your progress and compete with others!
           </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="signup" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            <TabsTrigger value="login">Login</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-[#333]">
+            <TabsTrigger 
+              value="signup"
+              className="data-[state=active]:bg-[#00ff00] data-[state=active]:text-black"
+            >
+              Sign Up
+            </TabsTrigger>
+            <TabsTrigger 
+              value="login"
+              className="data-[state=active]:bg-[#00ff00] data-[state=active]:text-black"
+            >
+              Login
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="signup">
             <form onSubmit={handleSignUp} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  disabled={isSubmitting}
-                  required
-                />
-              </div>
+              <UsernameInput
+                value={username}
+                onChange={setUsername}
+                disabled={isSubmitting}
+              />
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -238,7 +242,7 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
                   onChange={handleEmailChange}
                   disabled={isSubmitting}
                   required
-                  className={emailError ? "border-red-500" : ""}
+                  className={`${emailError ? "border-red-500" : ""} bg-[#333] border-[#444] text-white`}
                 />
                 {emailError && (
                   <Alert variant="destructive">
@@ -252,14 +256,15 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
                   checked={termsAccepted}
                   onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
                   disabled={isSubmitting}
+                  className="border-[#444] data-[state=checked]:bg-[#00ff00]"
                 />
-                <Label htmlFor="terms" className="text-sm">
+                <Label htmlFor="terms" className="text-sm text-gray-300">
                   I accept the terms and conditions. My email will not be displayed on the leaderboard.
                 </Label>
               </div>
               <Button 
                 type="submit" 
-                className="w-full" 
+                className="w-full bg-[#00ff00] text-black hover:bg-[#00cc00]" 
                 disabled={isSubmitting || !!emailError}
               >
                 {isSubmitting ? 'Signing up...' : 'Sign Up'}
@@ -279,7 +284,7 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
                   onChange={handleEmailChange}
                   disabled={isSubmitting}
                   required
-                  className={emailError ? "border-red-500" : ""}
+                  className={`${emailError ? "border-red-500" : ""} bg-[#333] border-[#444] text-white`}
                 />
                 {emailError && (
                   <Alert variant="destructive">
@@ -289,7 +294,7 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
               </div>
               <Button 
                 type="submit" 
-                className="w-full" 
+                className="w-full bg-[#00ff00] text-black hover:bg-[#00cc00]" 
                 disabled={isSubmitting || !!emailError}
               >
                 {isSubmitting ? 'Sending link...' : 'Send Magic Link'}
