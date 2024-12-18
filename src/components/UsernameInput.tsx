@@ -23,18 +23,19 @@ const UsernameInput = ({ value, onChange, disabled }: UsernameInputProps) => {
 
       setIsChecking(true);
       try {
-        const { data: existingProfiles } = await supabase
+        const { data: existingProfile } = await supabase
           .from('profiles')
           .select('username')
           .eq('username', value)
-          .single();
+          .maybeSingle();
 
-        if (existingProfiles) {
+        if (existingProfile) {
           setUsernameError('This username is already taken');
         } else {
           setUsernameError('');
         }
       } catch (error) {
+        console.error('Error checking username:', error);
         setUsernameError('');
       } finally {
         setIsChecking(false);
