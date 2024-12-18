@@ -73,8 +73,9 @@ export type Database = {
       leaderboard: {
         Row: {
           avg_attempts: number | null
+          avg_completion_time: number | null
+          best_completion_time: number | null
           best_score: number | null
-          best_time: unknown | null
           games_played: number | null
           username: string | null
         }

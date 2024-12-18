@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface SignUpDialogProps {
   open: boolean;
@@ -29,6 +30,8 @@ const SignUpDialog = ({
   const [username, setUsername] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [existingUsername, setExistingUsername] = useState('');
+  const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,20 +42,7 @@ const SignUpDialog = ({
 
     setIsSubmitting(true);
     try {
-      // First check if the username is already taken
-      const { data: existingUser } = await supabase
-        .from('profiles')
-        .select('username, email')
-        .eq('username', username)
-        .maybeSingle();
-
-      if (existingUser) {
-        toast.error("This username is already taken. Please choose another one.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Check if the email exists with a different username
+      // First check if the email exists
       const { data: existingEmail } = await supabase
         .from('profiles')
         .select('username, email')
@@ -60,37 +50,42 @@ const SignUpDialog = ({
         .maybeSingle();
 
       if (existingEmail) {
-        if (!confirm("This email is already registered with a different username. Would you like to update your username?")) {
-          setIsSubmitting(false);
-          return;
-        }
+        setExistingUsername(existingEmail.username);
+        setShowUpdatePrompt(true);
+        setIsSubmitting(false);
+        return;
       }
 
-      // Create or update profile
+      // If email doesn't exist, check if username is taken
+      const { data: existingUsername } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
+        .maybeSingle();
+
+      if (existingUsername) {
+        toast.error("This username is already taken. Please choose another one.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Create new profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .upsert([
+        .insert([
           {
             email,
             username,
             terms_accepted: termsAccepted
           }
-        ], {
-          onConflict: 'email'  // Use email as the conflict resolution field
-        })
+        ])
         .select()
         .single();
 
-      if (profileError) {
-        if (profileError.code === '23505') {  // Unique violation error code
-          toast.error("This username is already taken. Please choose another one.");
-          return;
-        }
-        throw profileError;
-      }
+      if (profileError) throw profileError;
 
       // Save score if game is complete
-      if (currentScore !== undefined && word && profile) {
+      if (currentScore !== undefined && word && profile && completionTime) {
         const { error: scoreError } = await supabase
           .from('scores')
           .insert([
@@ -115,6 +110,45 @@ const SignUpDialog = ({
     }
   };
 
+  const handleUpdateUsername = async () => {
+    setIsSubmitting(true);
+    try {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .update({ username })
+        .eq('email', email)
+        .select()
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Save score if game is complete
+      if (currentScore !== undefined && word && profile && completionTime) {
+        const { error: scoreError } = await supabase
+          .from('scores')
+          .insert([
+            {
+              profile_id: profile.id,
+              word,
+              attempts: currentScore,
+              completion_time: completionTime
+            }
+          ]);
+
+        if (scoreError) throw scoreError;
+      }
+
+      toast.success("Username updated and score saved successfully!");
+      onSuccess();
+    } catch (error: any) {
+      console.error('Error updating username:', error);
+      toast.error(error.message || "An error occurred while updating username");
+    } finally {
+      setIsSubmitting(false);
+      setShowUpdatePrompt(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -125,45 +159,72 @@ const SignUpDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <UsernameInput
-            value={username}
-            onChange={setUsername}
-            disabled={isSubmitting}
-          />
-          
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isSubmitting}
-              required
-            />
+        {showUpdatePrompt ? (
+          <div className="space-y-4">
+            <Alert>
+              <AlertDescription>
+                This email is already registered with the username "{existingUsername}". 
+                Would you like to update your username to "{username}"?
+              </AlertDescription>
+            </Alert>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleUpdateUsername} 
+                disabled={isSubmitting}
+                className="flex-1"
+              >
+                Yes, Update Username
+              </Button>
+              <Button 
+                onClick={() => setShowUpdatePrompt(false)} 
+                variant="outline"
+                className="flex-1"
+              >
+                No, Keep Current
+              </Button>
+            </div>
           </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="terms"
-              checked={termsAccepted}
-              onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <UsernameInput
+              value={username}
+              onChange={setUsername}
               disabled={isSubmitting}
             />
-            <Label htmlFor="terms" className="text-sm">
-              I accept the terms and conditions
-            </Label>
-          </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isSubmitting}
+                required
+              />
+            </div>
 
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Saving...' : 'Save Score'}
-          </Button>
-        </form>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="terms"
+                checked={termsAccepted}
+                onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                disabled={isSubmitting}
+              />
+              <Label htmlFor="terms" className="text-sm">
+                I accept the terms and conditions
+              </Label>
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Saving...' : 'Save Score'}
+            </Button>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
