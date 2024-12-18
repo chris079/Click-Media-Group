@@ -13,32 +13,23 @@ export type Database = {
         Row: {
           created_at: string
           email: string
-          email_verified: boolean | null
-          first_name: string | null
           id: string
-          last_name: string | null
-          terms_accepted: boolean | null
-          username: string | null
+          terms_accepted: boolean
+          username: string
         }
         Insert: {
           created_at?: string
           email: string
-          email_verified?: boolean | null
-          first_name?: string | null
-          id: string
-          last_name?: string | null
-          terms_accepted?: boolean | null
-          username?: string | null
+          id?: string
+          terms_accepted?: boolean
+          username: string
         }
         Update: {
           created_at?: string
           email?: string
-          email_verified?: boolean | null
-          first_name?: string | null
           id?: string
-          last_name?: string | null
-          terms_accepted?: boolean | null
-          username?: string | null
+          terms_accepted?: boolean
+          username?: string
         }
         Relationships: []
       }
@@ -47,27 +38,27 @@ export type Database = {
           attempts: number
           created_at: string
           id: string
-          user_id: string | null
+          profile_id: string | null
           word: string
         }
         Insert: {
           attempts: number
           created_at?: string
           id?: string
-          user_id?: string | null
+          profile_id?: string | null
           word: string
         }
         Update: {
           attempts?: number
           created_at?: string
           id?: string
-          user_id?: string | null
+          profile_id?: string | null
           word?: string
         }
         Relationships: [
           {
-            foreignKeyName: "scores_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "scores_profile_id_fkey"
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -80,7 +71,6 @@ export type Database = {
         Row: {
           avg_attempts: number | null
           best_score: number | null
-          email: string | null
           games_played: number | null
           username: string | null
         }

@@ -5,25 +5,21 @@ import { toast } from "sonner";
 import { isValidWord } from '@/utils/wordValidation';
 import { supabase } from "@/integrations/supabase/client";
 import GameStatus from './GameStatus';
+import SignUpDialog from './SignUpDialog';
 
-interface GameContainerProps {
-  session: any;
-  onShowSignUp: () => void;
-}
-
-const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
+const GameContainer = () => {
   const [currentGuess, setCurrentGuess] = useState('');
   const [guesses, setGuesses] = useState<string[]>([]);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [wordOfTheDay] = useState('HOUSE');
-  const [showingSignUp, setShowingSignUp] = useState(false);
+  const [showSignUp, setShowSignUp] = useState(false);
   const [usedLetters, setUsedLetters] = useState<{
     [key: string]: 'correct' | 'present' | 'absent' | undefined;
   }>({});
 
   const handleKeyDown = (event: KeyboardEvent) => {
-    if (gameOver || showingSignUp) return; // Prevent input when signup dialog is shown
+    if (gameOver || showSignUp) return;
 
     if (event.key === 'Enter' && currentGuess.length === 5) {
       if (!isValidWord(currentGuess)) {
@@ -41,9 +37,9 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentGuess, gameOver, showingSignUp]); // Add showingSignUp to dependencies
+  }, [currentGuess, gameOver, showSignUp]);
 
-  const submitGuess = async () => {
+  const submitGuess = () => {
     if (currentGuess.length !== 5) {
       toast.error("Word must be 5 letters!");
       return;
@@ -73,25 +69,14 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
     if (currentGuess === wordOfTheDay) {
       setGameWon(true);
       setGameOver(true);
+      setShowSignUp(true);
       toast.success("Congratulations! You've won!");
-      if (session?.user) {
-        const { error } = await supabase
-          .from('scores')
-          .insert([
-            {
-              user_id: session.user.id,
-              word: wordOfTheDay,
-              attempts: newGuesses.length,
-            }
-          ]);
-        if (error) console.error('Error saving score:', error);
-      }
     } else if (newGuesses.length >= 6) {
       setGameOver(true);
+      setShowSignUp(true);
       toast.error(`Game Over! The word was ${wordOfTheDay}`);
-    } else if (newGuesses.length >= 3 && !session) {
-      setShowingSignUp(true);
-      onShowSignUp();
+    } else if (newGuesses.length >= 3) {
+      setShowSignUp(true);
     }
   };
 
@@ -112,12 +97,12 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
       
       <Keyboard
         onKeyPress={(key) => {
-          if (!showingSignUp && !gameOver && currentGuess.length < 5) {
+          if (!showSignUp && !gameOver && currentGuess.length < 5) {
             setCurrentGuess(prev => prev + key);
           }
         }}
         onEnter={() => {
-          if (!showingSignUp && !gameOver && currentGuess.length === 5) {
+          if (!showSignUp && !gameOver && currentGuess.length === 5) {
             if (!isValidWord(currentGuess)) {
               toast.error("Not a valid word!");
               return;
@@ -126,11 +111,19 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
           }
         }}
         onDelete={() => {
-          if (!showingSignUp && !gameOver) {
+          if (!showSignUp && !gameOver) {
             setCurrentGuess(prev => prev.slice(0, -1));
           }
         }}
         usedLetters={usedLetters}
+      />
+
+      <SignUpDialog
+        open={showSignUp}
+        onOpenChange={setShowSignUp}
+        onSuccess={() => setShowSignUp(false)}
+        currentScore={guesses.length}
+        word={wordOfTheDay}
       />
     </div>
   );
