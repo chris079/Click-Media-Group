@@ -39,26 +39,30 @@ const SignUpDialog = ({
 
     setIsSubmitting(true);
     try {
-      // Check for existing username/email combinations
-      const { data: existingProfiles } = await supabase
+      // First check if the username is already taken
+      const { data: existingUser } = await supabase
         .from('profiles')
-        .select('*')
-        .or(`username.eq.${username},email.eq.${email}`);
+        .select('username, email')
+        .eq('username', username)
+        .maybeSingle();
 
-      if (existingProfiles && existingProfiles.length > 0) {
-        const existingProfile = existingProfiles[0];
-        
-        if (existingProfile.username === username && existingProfile.email !== email) {
-          toast.error("This username is already taken. Please choose another one.");
+      if (existingUser) {
+        toast.error("This username is already taken. Please choose another one.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Check if the email exists with a different username
+      const { data: existingEmail } = await supabase
+        .from('profiles')
+        .select('username, email')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (existingEmail) {
+        if (!confirm("This email is already registered with a different username. Would you like to update your username?")) {
           setIsSubmitting(false);
           return;
-        }
-        
-        if (existingProfile.email === email && existingProfile.username !== username) {
-          if (!confirm("You're using a different username than before. Are you sure you want to continue?")) {
-            setIsSubmitting(false);
-            return;
-          }
         }
       }
 
@@ -71,11 +75,19 @@ const SignUpDialog = ({
             username,
             terms_accepted: termsAccepted
           }
-        ])
+        ], {
+          onConflict: 'email'  // Use email as the conflict resolution field
+        })
         .select()
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        if (profileError.code === '23505') {  // Unique violation error code
+          toast.error("This username is already taken. Please choose another one.");
+          return;
+        }
+        throw profileError;
+      }
 
       // Save score if game is complete
       if (currentScore !== undefined && word && profile) {
