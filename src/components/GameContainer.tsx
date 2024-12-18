@@ -7,7 +7,12 @@ import { supabase } from "@/integrations/supabase/client";
 import GameStatus from './GameStatus';
 import SignUpDialog from './SignUpDialog';
 
-const GameContainer = () => {
+interface GameContainerProps {
+  session?: any;
+  onShowSignUp?: () => void;
+}
+
+const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
   const [currentGuess, setCurrentGuess] = useState('');
   const [guesses, setGuesses] = useState<string[]>([]);
   const [gameOver, setGameOver] = useState(false);

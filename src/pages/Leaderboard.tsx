@@ -31,7 +31,7 @@ const Leaderboard = () => {
         <TableBody>
           {leaderboardData?.map((entry, index) => (
             <TableRow key={index}>
-              <TableCell>{entry.username || entry.email}</TableCell>
+              <TableCell>{entry.username}</TableCell>
               <TableCell>{entry.games_played}</TableCell>
               <TableCell>{Number(entry.avg_attempts).toFixed(1)}</TableCell>
               <TableCell>{entry.best_score}</TableCell>
