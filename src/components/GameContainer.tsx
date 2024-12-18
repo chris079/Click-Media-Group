@@ -17,12 +17,13 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [wordOfTheDay] = useState('HOUSE');
+  const [showingSignUp, setShowingSignUp] = useState(false);
   const [usedLetters, setUsedLetters] = useState<{
     [key: string]: 'correct' | 'present' | 'absent' | undefined;
   }>({});
 
   const handleKeyDown = (event: KeyboardEvent) => {
-    if (gameOver) return;
+    if (gameOver || showingSignUp) return; // Prevent input when signup dialog is shown
 
     if (event.key === 'Enter' && currentGuess.length === 5) {
       if (!isValidWord(currentGuess)) {
@@ -40,7 +41,7 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentGuess, gameOver]);
+  }, [currentGuess, gameOver, showingSignUp]); // Add showingSignUp to dependencies
 
   const submitGuess = async () => {
     if (currentGuess.length !== 5) {
@@ -89,6 +90,7 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
       setGameOver(true);
       toast.error(`Game Over! The word was ${wordOfTheDay}`);
     } else if (newGuesses.length >= 3 && !session) {
+      setShowingSignUp(true);
       onShowSignUp();
     }
   };
@@ -110,12 +112,12 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
       
       <Keyboard
         onKeyPress={(key) => {
-          if (currentGuess.length < 5) {
+          if (!showingSignUp && !gameOver && currentGuess.length < 5) {
             setCurrentGuess(prev => prev + key);
           }
         }}
         onEnter={() => {
-          if (currentGuess.length === 5) {
+          if (!showingSignUp && !gameOver && currentGuess.length === 5) {
             if (!isValidWord(currentGuess)) {
               toast.error("Not a valid word!");
               return;
@@ -124,7 +126,9 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
           }
         }}
         onDelete={() => {
-          setCurrentGuess(prev => prev.slice(0, -1));
+          if (!showingSignUp && !gameOver) {
+            setCurrentGuess(prev => prev.slice(0, -1));
+          }
         }}
         usedLetters={usedLetters}
       />

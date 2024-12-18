@@ -39,8 +39,16 @@ const SignUpDialog = ({ open, onOpenChange, onSignUp }: SignUpDialogProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal>
-      <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
+    <Dialog 
+      open={open} 
+      onOpenChange={() => {}} // Prevent dialog from being closed
+      modal
+    >
+      <DialogContent 
+        className="sm:max-w-md" 
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()} // Prevent closing with Escape key
+      >
         <DialogHeader>
           <DialogTitle>Join the Leaderboard!</DialogTitle>
           <DialogDescription>
@@ -55,6 +63,7 @@ const SignUpDialog = ({ open, onOpenChange, onSignUp }: SignUpDialogProps) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isSubmitting}
+              autoComplete="email"
             />
           </div>
           <Button 
