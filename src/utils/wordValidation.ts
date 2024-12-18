@@ -1,12 +1,14 @@
 // Fetch words from the GitHub repository
 const fetchValidWords = async () => {
   try {
-    const response = await fetch('https://raw.githubusercontent.com/droyson/go-fetch-words/main/data/words.json');
+    // Using a more reliable word list source
+    const response = await fetch('https://raw.githubusercontent.com/dwyl/english-words/master/words_dictionary.json');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const words: string[] = await response.json();
-    return new Set(words.filter((word: string) => word.length === 5).map((word: string) => word.toUpperCase()));
+    const words = await response.json();
+    // Convert object keys to array and filter 5-letter words
+    return new Set(Object.keys(words).filter((word: string) => word.length === 5).map((word: string) => word.toUpperCase()));
   } catch (error) {
     console.error('Error fetching words:', error);
     return null;
