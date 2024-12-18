@@ -36,6 +36,20 @@ const SignUpDialog = ({
     try {
       const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
       
+      // First check if this email/username combination already exists
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .match({ email, username: capitalizedUsername })
+        .maybeSingle();
+
+      if (existingProfile) {
+        toast.success("Welcome back!");
+        onSuccess();
+        return true;
+      }
+
+      // Then try to create the new profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .insert([
@@ -49,9 +63,16 @@ const SignUpDialog = ({
         .maybeSingle();
 
       if (profileError) {
+        // Handle specific error cases
         if (profileError.code === '23505') {
-          toast.error("This email is already registered. Please use another email.");
-          return false;
+          if (profileError.message?.includes('profiles_email_key')) {
+            toast.error("This email is already registered with a different username");
+            return false;
+          }
+          if (profileError.message?.includes('profiles_username_key')) {
+            toast.error("This username is already taken by another user");
+            return false;
+          }
         }
         throw profileError;
       }

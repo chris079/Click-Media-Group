@@ -8,7 +8,7 @@ interface UsernameInputProps {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
-  shouldCheck?: boolean; // New prop to control when to check username
+  shouldCheck?: boolean;
 }
 
 const UsernameInput = ({ value, onChange, disabled, shouldCheck = true }: UsernameInputProps) => {
@@ -27,7 +27,7 @@ const UsernameInput = ({ value, onChange, disabled, shouldCheck = true }: Userna
         const { data: existingProfile } = await supabase
           .from('profiles')
           .select('username')
-          .eq('username', value)
+          .eq('username', value.charAt(0).toUpperCase() + value.slice(1))
           .maybeSingle();
 
         if (existingProfile) {
