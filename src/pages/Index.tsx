@@ -11,15 +11,12 @@ const Index = () => {
   const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
-    // Initialize word list
     initializeWordList();
-
-    // Check for existing session
+    
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -34,7 +31,7 @@ const Index = () => {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: `${window.location.origin}/`,
         },
       });
       

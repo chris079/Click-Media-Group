@@ -1,38 +1,28 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { z } from "zod";
-import { useState } from "react";
-
-const userSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-});
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface SignUpDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSignUp: (email: string) => void;
+  onSignUp: (email: string) => Promise<void>;
 }
 
 const SignUpDialog = ({ open, onOpenChange, onSignUp }: SignUpDialogProps) => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    
+    if (!email) return;
+
+    setIsSubmitting(true);
     try {
-      userSchema.parse({ email });
-      setIsSubmitting(true);
       await onSignUp(email);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        error.errors.forEach(err => {
-          toast.error(err.message);
-        });
-      }
+      console.error('Error during signup:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -47,28 +37,31 @@ const SignUpDialog = ({ open, onOpenChange, onSignUp }: SignUpDialogProps) => {
       <DialogContent 
         className="sm:max-w-md" 
         onPointerDownOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()} // Prevent closing with Escape key
+        onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader>
           <DialogTitle>Join the Leaderboard!</DialogTitle>
           <DialogDescription>
-            Enter your email to sign up and track your progress.
+            Enter your email to save your progress and compete with others!
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSignUp} className="space-y-4">
-          <div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
             <Input
+              id="email"
               type="email"
-              placeholder="Email"
+              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isSubmitting}
               autoComplete="email"
+              required
             />
           </div>
           <Button 
             type="submit" 
-            className="w-full"
+            className="w-full" 
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Sending...' : 'Continue with Email'}
