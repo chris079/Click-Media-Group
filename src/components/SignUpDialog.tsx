@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface SignUpDialogProps {
   open: boolean;
@@ -20,11 +21,36 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
   const [email, setEmail] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [emailError, setEmailError] = useState('');
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError('Please enter a valid email address');
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
+    if (newEmail) {
+      validateEmail(newEmail);
+    } else {
+      setEmailError('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !email || !termsAccepted) {
       toast.error("Please fill in all fields and accept the terms");
+      return;
+    }
+
+    if (!validateEmail(email)) {
       return;
     }
 
@@ -57,6 +83,7 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
             username,
             email,
             terms_accepted: termsAccepted,
+            email_verified: false // Initially set to false
           }
         ])
         .select()
@@ -79,7 +106,7 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
         if (scoreError) throw scoreError;
       }
 
-      toast.success("Successfully registered!");
+      toast.success("Successfully registered! Please check your email for verification.");
       onSuccess();
     } catch (error: any) {
       console.error('Error during signup:', error);
@@ -125,10 +152,16 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
               type="email"
               placeholder="Enter your email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleEmailChange}
               disabled={isSubmitting}
               required
+              className={emailError ? "border-red-500" : ""}
             />
+            {emailError && (
+              <Alert variant="destructive">
+                <AlertDescription>{emailError}</AlertDescription>
+              </Alert>
+            )}
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -144,7 +177,7 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={isSubmitting}
+            disabled={isSubmitting || !!emailError}
           >
             {isSubmitting ? 'Saving...' : 'Join Leaderboard'}
           </Button>
