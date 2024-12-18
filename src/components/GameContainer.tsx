@@ -23,6 +23,26 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
     [key: string]: 'correct' | 'present' | 'absent' | undefined;
   }>({});
 
+  useEffect(() => {
+    // Check for existing session on mount
+    checkSession();
+  }, []);
+
+  const checkSession = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+      
+      if (profile) {
+        setShowSignUp(false);
+      }
+    }
+  };
+
   const handleKeyDown = (event: KeyboardEvent) => {
     if (gameOver || showSignUp) return;
 
@@ -44,7 +64,7 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentGuess, gameOver, showSignUp]);
 
-  const submitGuess = () => {
+  const submitGuess = async () => {
     if (currentGuess.length !== 5) {
       toast.error("Word must be 5 letters!");
       return;
@@ -71,11 +91,30 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
     });
     setUsedLetters(newUsedLetters);
 
+    // Check game status
     if (currentGuess === wordOfTheDay) {
       setGameWon(true);
       setGameOver(true);
       setShowSignUp(true);
       toast.success("Congratulations! You've won!");
+
+      // Save score if user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { error: scoreError } = await supabase
+          .from('scores')
+          .insert([
+            {
+              profile_id: session.user.id,
+              word: wordOfTheDay,
+              attempts: newGuesses.length,
+            }
+          ]);
+
+        if (scoreError) {
+          console.error('Error saving score:', scoreError);
+        }
+      }
     } else if (newGuesses.length >= 6) {
       setGameOver(true);
       setShowSignUp(true);
