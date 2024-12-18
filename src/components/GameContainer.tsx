@@ -22,9 +22,10 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
   const [usedLetters, setUsedLetters] = useState<{
     [key: string]: 'correct' | 'present' | 'absent' | undefined;
   }>({});
+  const [invalidAttempts, setInvalidAttempts] = useState(0);
+  const [isShaking, setIsShaking] = useState(false);
 
   useEffect(() => {
-    // Check for existing session on mount
     checkSession();
   }, []);
 
@@ -43,26 +44,20 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
     }
   };
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (gameOver || showSignUp) return;
-
-    if (event.key === 'Enter' && currentGuess.length === 5) {
-      if (!isValidWord(currentGuess)) {
-        toast.error("Not a valid word!");
-        return;
-      }
-      submitGuess();
-    } else if (event.key === 'Backspace') {
-      setCurrentGuess(prev => prev.slice(0, -1));
-    } else if (/^[A-Za-z]$/.test(event.key) && currentGuess.length < 5) {
-      setCurrentGuess(prev => prev + event.key.toUpperCase());
-    }
+  const shakeScreen = () => {
+    setIsShaking(true);
+    setTimeout(() => setIsShaking(false), 500);
   };
 
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentGuess, gameOver, showSignUp]);
+  const handleInvalidWord = () => {
+    shakeScreen();
+    setInvalidAttempts(prev => prev + 1);
+    
+    if (invalidAttempts >= 1) {
+      toast.error("Not a valid word!");
+      setInvalidAttempts(0);
+    }
+  };
 
   const submitGuess = async () => {
     if (currentGuess.length !== 5) {
@@ -70,11 +65,16 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
       return;
     }
 
+    if (!isValidWord(currentGuess)) {
+      handleInvalidWord();
+      return;
+    }
+
+    setInvalidAttempts(0);
     const newGuesses = [...guesses, currentGuess];
     setGuesses(newGuesses);
     setCurrentGuess('');
 
-    // Update used letters
     const newUsedLetters = { ...usedLetters };
     currentGuess.split('').forEach((letter, index) => {
       if (letter === wordOfTheDay[index]) {
@@ -91,14 +91,12 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
     });
     setUsedLetters(newUsedLetters);
 
-    // Check game status
     if (currentGuess === wordOfTheDay) {
       setGameWon(true);
       setGameOver(true);
       setShowSignUp(true);
       toast.success("Congratulations! You've won!");
 
-      // Save score if user is authenticated
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         const { error: scoreError } = await supabase
@@ -125,7 +123,16 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className={`max-w-2xl mx-auto ${isShaking ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
+      <style>
+        {`
+          @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+            20%, 40%, 60%, 80% { transform: translateX(2px); }
+          }
+        `}
+      </style>
       <WordGrid
         guesses={guesses}
         currentGuess={currentGuess}
@@ -147,10 +154,6 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
         }}
         onEnter={() => {
           if (!showSignUp && !gameOver && currentGuess.length === 5) {
-            if (!isValidWord(currentGuess)) {
-              toast.error("Not a valid word!");
-              return;
-            }
             submitGuess();
           }
         }}
