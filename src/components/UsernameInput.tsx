@@ -8,15 +8,16 @@ interface UsernameInputProps {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  shouldCheck?: boolean; // New prop to control when to check username
 }
 
-const UsernameInput = ({ value, onChange, disabled }: UsernameInputProps) => {
+const UsernameInput = ({ value, onChange, disabled, shouldCheck = true }: UsernameInputProps) => {
   const [usernameError, setUsernameError] = useState('');
   const [isChecking, setIsChecking] = useState(false);
 
   useEffect(() => {
     const checkUsername = async () => {
-      if (!value) {
+      if (!value || !shouldCheck) {
         setUsernameError('');
         return;
       }
@@ -44,7 +45,7 @@ const UsernameInput = ({ value, onChange, disabled }: UsernameInputProps) => {
 
     const timeoutId = setTimeout(checkUsername, 500);
     return () => clearTimeout(timeoutId);
-  }, [value]);
+  }, [value, shouldCheck]);
 
   return (
     <div className="space-y-2">
@@ -58,7 +59,7 @@ const UsernameInput = ({ value, onChange, disabled }: UsernameInputProps) => {
         required
         className={usernameError ? "border-red-500" : ""}
       />
-      {usernameError && (
+      {usernameError && shouldCheck && (
         <Alert variant="destructive">
           <AlertDescription>{usernameError}</AlertDescription>
         </Alert>

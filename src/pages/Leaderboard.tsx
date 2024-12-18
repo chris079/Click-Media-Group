@@ -55,7 +55,10 @@ const Leaderboard = () => {
   const filteredData = leaderboardData
     ? sortData(leaderboardData.filter(entry => 
         entry.username.toLowerCase().includes(search.toLowerCase())
-      ))
+      )).map(entry => ({
+        ...entry,
+        username: entry.username.charAt(0).toUpperCase() + entry.username.slice(1)
+      }))
     : [];
 
   if (isLoading) return (

@@ -13,6 +13,7 @@ interface SignUpDialogProps {
   currentScore?: number;
   word?: string;
   completionTime?: string;
+  gameWon: boolean; // Add this prop to track if the game was won
 }
 
 const SignUpDialog = ({ 
@@ -21,7 +22,8 @@ const SignUpDialog = ({
   onSuccess, 
   currentScore, 
   word,
-  completionTime 
+  completionTime,
+  gameWon 
 }: SignUpDialogProps) => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -43,13 +45,14 @@ const SignUpDialog = ({
         return false;
       }
 
-      // Create new profile
+      // Create new profile with capitalized username
+      const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .insert([
           {
             email,
-            username,
+            username: capitalizedUsername,
             terms_accepted: termsAccepted
           }
         ])
@@ -57,7 +60,7 @@ const SignUpDialog = ({
         .maybeSingle();
 
       if (profileError) {
-        if (profileError.code === '23505') { // Unique violation error code
+        if (profileError.code === '23505') {
           toast.error("This email is already registered. Please use another email.");
           return false;
         }
@@ -69,8 +72,8 @@ const SignUpDialog = ({
         return false;
       }
 
-      // Save score if game is complete
-      if (currentScore !== undefined && word && profile && completionTime) {
+      // Only save score if game was won
+      if (gameWon && currentScore !== undefined && word && profile && completionTime) {
         const { error: scoreError } = await supabase
           .from('scores')
           .insert([
@@ -136,7 +139,7 @@ const SignUpDialog = ({
           spread: 70,
           origin: { y: 0.6 }
         });
-        toast.success("Score saved successfully!");
+        toast.success("Profile created successfully!");
         onSuccess();
       }
     } catch (error: any) {
@@ -194,6 +197,7 @@ const SignUpDialog = ({
             setTermsAccepted={setTermsAccepted}
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
+            shouldCheckUsername={!!email} // Only check username if email is filled
           />
         )}
       </DialogContent>
