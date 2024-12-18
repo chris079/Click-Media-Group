@@ -116,7 +116,8 @@ const Index = () => {
   };
 
   const handleShare = () => {
-    shareToLinkedIn(guesses.length, `I solved today's Wordle in ${gameWon ? guesses.length : 'X'}/6! Can you beat my score?`);
+    const shareText = `I solved today's Wordle in ${gameWon ? guesses.length : 'X'}/6! Can you beat my score?`;
+    shareToLinkedIn(shareText);
   };
 
   return (

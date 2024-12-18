@@ -1,7 +1,7 @@
 // Fetch words from the GitHub repository
 const fetchValidWords = async () => {
   try {
-    const response = await fetch('https://raw.githubusercontent.com/droyson/go-fetch-words/main/words.json');
+    const response = await fetch('https://raw.githubusercontent.com/droyson/go-fetch-words/main/data/words.json');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
