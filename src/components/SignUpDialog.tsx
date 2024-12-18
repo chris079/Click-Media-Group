@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import UsernameInput from './UsernameInput';
+import SignUpForm from './auth/SignUpForm';
+import LoginForm from './auth/LoginForm';
 
 interface SignUpDialogProps {
   open: boolean;
@@ -19,9 +15,7 @@ interface SignUpDialogProps {
 }
 
 const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: SignUpDialogProps) => {
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [termsAccepted, setTermsAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [activeTab, setActiveTab] = useState('signup');
@@ -66,131 +60,6 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
     }
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) {
-      toast.error("Please enter your email");
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('email', email)
-        .single();
-
-      if (!profile) {
-        toast.error("No account found with this email");
-        return;
-      }
-
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          data: {
-            username: profile.username
-          }
-        }
-      });
-
-      if (error) throw error;
-
-      toast.success("Magic link sent! Check your email to log in.");
-    } catch (error: any) {
-      console.error('Error during login:', error);
-      toast.error(error.message || "An error occurred during login");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!username || !email || !termsAccepted) {
-      toast.error("Please fill in all fields and accept the terms");
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      // First check if username or email already exists
-      const { data: existingProfiles, error: checkError } = await supabase
-        .from('profiles')
-        .select('username, email')
-        .or(`username.eq.${username},email.eq.${email}`);
-
-      if (checkError) throw checkError;
-
-      if (existingProfiles && existingProfiles.length > 0) {
-        const existingProfile = existingProfiles[0];
-        if (existingProfile.username === username) {
-          toast.error("This username is already taken. Please choose another one.");
-        } else if (existingProfile.email === email) {
-          toast.error("This email is already registered. Please use another email.");
-        }
-        setIsSubmitting(false);
-        return;
-      }
-
-      // If no existing profile found, proceed with creation
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            username,
-            email,
-            terms_accepted: termsAccepted,
-            email_verified: false
-          }
-        ])
-        .select()
-        .single();
-
-      if (profileError) throw profileError;
-
-      // Send magic link for authentication
-      const { error: authError } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          data: {
-            username
-          }
-        }
-      });
-
-      if (authError) throw authError;
-
-      // If we have a score to record, save it
-      if (currentScore && word && profile) {
-        const { error: scoreError } = await supabase
-          .from('scores')
-          .insert([
-            {
-              profile_id: profile.id,
-              word,
-              attempts: currentScore,
-            }
-          ]);
-
-        if (scoreError) throw scoreError;
-      }
-
-      toast.success("Check your email for the magic link to complete registration!");
-      onSuccess();
-    } catch (error: any) {
-      console.error('Error during signup:', error);
-      toast.error(error.message || "An error occurred during signup");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <Dialog 
       open={open} 
@@ -198,108 +67,52 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
       modal
     >
       <DialogContent 
-        className="sm:max-w-md bg-[#1a1a1a] text-white border-[#333]" 
+        className="sm:max-w-md bg-white text-gray-900 border-gray-200" 
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className="text-[#00ff00]">Join ClickSocials Wordle!</DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogTitle className="text-[#0047BB]">Join Click Media Group Wordle!</DialogTitle>
+          <DialogDescription className="text-gray-600">
             Sign up or log in to save your progress and compete with others!
           </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="signup" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 bg-[#333]">
+          <TabsList className="grid w-full grid-cols-2 bg-gray-100">
             <TabsTrigger 
               value="signup"
-              className="data-[state=active]:bg-[#00ff00] data-[state=active]:text-black"
+              className="data-[state=active]:bg-[#0047BB] data-[state=active]:text-white"
             >
               Sign Up
             </TabsTrigger>
             <TabsTrigger 
               value="login"
-              className="data-[state=active]:bg-[#00ff00] data-[state=active]:text-black"
+              className="data-[state=active]:bg-[#0047BB] data-[state=active]:text-white"
             >
               Login
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="signup">
-            <form onSubmit={handleSignUp} className="space-y-4">
-              <UsernameInput
-                value={username}
-                onChange={setUsername}
-                disabled={isSubmitting}
-              />
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={handleEmailChange}
-                  disabled={isSubmitting}
-                  required
-                  className={`${emailError ? "border-red-500" : ""} bg-[#333] border-[#444] text-white`}
-                />
-                {emailError && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{emailError}</AlertDescription>
-                  </Alert>
-                )}
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="terms"
-                  checked={termsAccepted}
-                  onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
-                  disabled={isSubmitting}
-                  className="border-[#444] data-[state=checked]:bg-[#00ff00]"
-                />
-                <Label htmlFor="terms" className="text-sm text-gray-300">
-                  I accept the terms and conditions. My email will not be displayed on the leaderboard.
-                </Label>
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full bg-[#00ff00] text-black hover:bg-[#00cc00]" 
-                disabled={isSubmitting || !!emailError}
-              >
-                {isSubmitting ? 'Signing up...' : 'Sign Up'}
-              </Button>
-            </form>
+            <SignUpForm
+              email={email}
+              setEmail={handleEmailChange}
+              emailError={emailError}
+              isSubmitting={isSubmitting}
+              onSuccess={onSuccess}
+              currentScore={currentScore}
+              word={word}
+            />
           </TabsContent>
 
           <TabsContent value="login">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="login-email">Email</Label>
-                <Input
-                  id="login-email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={handleEmailChange}
-                  disabled={isSubmitting}
-                  required
-                  className={`${emailError ? "border-red-500" : ""} bg-[#333] border-[#444] text-white`}
-                />
-                {emailError && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{emailError}</AlertDescription>
-                  </Alert>
-                )}
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full bg-[#00ff00] text-black hover:bg-[#00cc00]" 
-                disabled={isSubmitting || !!emailError}
-              >
-                {isSubmitting ? 'Sending link...' : 'Send Magic Link'}
-              </Button>
-            </form>
+            <LoginForm
+              email={email}
+              setEmail={handleEmailChange}
+              emailError={emailError}
+              isSubmitting={isSubmitting}
+            />
           </TabsContent>
         </Tabs>
       </DialogContent>
