@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import SignUpForm from './auth/SignUpForm';
-import LoginForm from './auth/LoginForm';
+import UsernameInput from './UsernameInput';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface SignUpDialogProps {
   open: boolean;
@@ -12,108 +14,144 @@ interface SignUpDialogProps {
   onSuccess: () => void;
   currentScore?: number;
   word?: string;
+  completionTime?: string;
 }
 
-const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: SignUpDialogProps) => {
+const SignUpDialog = ({ 
+  open, 
+  onOpenChange, 
+  onSuccess, 
+  currentScore, 
+  word,
+  completionTime 
+}: SignUpDialogProps) => {
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [emailError, setEmailError] = useState('');
-  const [activeTab, setActiveTab] = useState('signup');
 
-  useEffect(() => {
-    checkExistingSession();
-  }, []);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!username || !email || !termsAccepted) {
+      toast.error("Please fill in all fields and accept the terms");
+      return;
+    }
 
-  const checkExistingSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      const { data: profile } = await supabase
+    setIsSubmitting(true);
+    try {
+      // Check for existing username/email combinations
+      const { data: existingProfiles } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', session.user.id)
-        .single();
-      
-      if (profile) {
-        onSuccess();
-        toast.success(`Welcome back, ${profile.username}!`);
+        .or(`username.eq.${username},email.eq.${email}`);
+
+      if (existingProfiles && existingProfiles.length > 0) {
+        const existingProfile = existingProfiles[0];
+        
+        if (existingProfile.username === username && existingProfile.email !== email) {
+          toast.error("This username is already taken. Please choose another one.");
+          setIsSubmitting(false);
+          return;
+        }
+        
+        if (existingProfile.email === email && existingProfile.username !== username) {
+          if (!confirm("You're using a different username than before. Are you sure you want to continue?")) {
+            setIsSubmitting(false);
+            return;
+          }
+        }
       }
-    }
-  };
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setEmailError('Please enter a valid email address');
-      return false;
-    }
-    setEmailError('');
-    return true;
-  };
+      // Create or update profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .upsert([
+          {
+            email,
+            username,
+            terms_accepted: termsAccepted
+          }
+        ])
+        .select()
+        .single();
 
-  const handleEmailChange = (newEmail: string) => {
-    setEmail(newEmail);
-    if (newEmail) {
-      validateEmail(newEmail);
-    } else {
-      setEmailError('');
+      if (profileError) throw profileError;
+
+      // Save score if game is complete
+      if (currentScore !== undefined && word && profile) {
+        const { error: scoreError } = await supabase
+          .from('scores')
+          .insert([
+            {
+              profile_id: profile.id,
+              word,
+              attempts: currentScore,
+              completion_time: completionTime
+            }
+          ]);
+
+        if (scoreError) throw scoreError;
+      }
+
+      toast.success("Score saved successfully!");
+      onSuccess();
+    } catch (error: any) {
+      console.error('Error during signup:', error);
+      toast.error(error.message || "An error occurred during signup");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onOpenChange={() => {}} 
-      modal
-    >
-      <DialogContent 
-        className="sm:max-w-md bg-white text-gray-900 border-gray-200" 
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
-      >
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-[#0047BB]">Join Click Media Group Wordle!</DialogTitle>
-          <DialogDescription className="text-gray-600">
-            Sign up or log in to save your progress and compete with others!
+          <DialogTitle>Want to see your name climb to the top?</DialogTitle>
+          <DialogDescription>
+            Add your username and email to save your scores, compete with others, and claim your spot on the leaderboard.
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="signup" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 bg-gray-100">
-            <TabsTrigger 
-              value="signup"
-              className="data-[state=active]:bg-[#0047BB] data-[state=active]:text-white"
-            >
-              Sign Up
-            </TabsTrigger>
-            <TabsTrigger 
-              value="login"
-              className="data-[state=active]:bg-[#0047BB] data-[state=active]:text-white"
-            >
-              Login
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="signup">
-            <SignUpForm
-              email={email}
-              setEmail={handleEmailChange}
-              emailError={emailError}
-              isSubmitting={isSubmitting}
-              onSuccess={onSuccess}
-              currentScore={currentScore}
-              word={word}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <UsernameInput
+            value={username}
+            onChange={setUsername}
+            disabled={isSubmitting}
+          />
+          
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isSubmitting}
+              required
             />
-          </TabsContent>
+          </div>
 
-          <TabsContent value="login">
-            <LoginForm
-              email={email}
-              setEmail={handleEmailChange}
-              emailError={emailError}
-              isSubmitting={isSubmitting}
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="terms"
+              checked={termsAccepted}
+              onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+              disabled={isSubmitting}
             />
-          </TabsContent>
-        </Tabs>
+            <Label htmlFor="terms" className="text-sm">
+              I accept the terms and conditions
+            </Label>
+          </div>
+
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Saving...' : 'Save Score'}
+          </Button>
+        </form>
       </DialogContent>
     </Dialog>
   );

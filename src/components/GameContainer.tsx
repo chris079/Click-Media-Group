@@ -24,25 +24,24 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
   }>({});
   const [invalidAttempts, setInvalidAttempts] = useState(0);
   const [isShaking, setIsShaking] = useState(false);
+  const [startTime] = useState<Date>(new Date());
 
   useEffect(() => {
-    checkSession();
-  }, []);
-
-  const checkSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (gameOver) return;
       
-      if (profile) {
-        setShowSignUp(false);
+      if (event.key === 'Enter') {
+        submitGuess();
+      } else if (event.key === 'Backspace') {
+        setCurrentGuess(prev => prev.slice(0, -1));
+      } else if (/^[A-Za-z]$/.test(event.key) && currentGuess.length < 5) {
+        setCurrentGuess(prev => prev + event.key.toUpperCase());
       }
-    }
-  };
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentGuess, gameOver]);
 
   const shakeScreen = () => {
     setIsShaking(true);
@@ -57,6 +56,12 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
       toast.error("Not a valid word!");
       setInvalidAttempts(0);
     }
+  };
+
+  const calculateCompletionTime = (): string => {
+    const endTime = new Date();
+    const timeDiff = endTime.getTime() - startTime.getTime();
+    return `${Math.floor(timeDiff / 1000)} seconds`;
   };
 
   const submitGuess = async () => {
@@ -91,32 +96,17 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
     });
     setUsedLetters(newUsedLetters);
 
-    if (currentGuess === wordOfTheDay) {
-      setGameWon(true);
+    if (currentGuess === wordOfTheDay || newGuesses.length >= 6) {
+      const won = currentGuess === wordOfTheDay;
+      setGameWon(won);
       setGameOver(true);
       setShowSignUp(true);
-      toast.success("Congratulations! You've won!");
-
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const { error: scoreError } = await supabase
-          .from('scores')
-          .insert([
-            {
-              profile_id: session.user.id,
-              word: wordOfTheDay,
-              attempts: newGuesses.length,
-            }
-          ]);
-
-        if (scoreError) {
-          console.error('Error saving score:', scoreError);
-        }
+      
+      if (won) {
+        toast.success("Congratulations! You've won!");
+      } else {
+        toast.error(`Game Over! The word was ${wordOfTheDay}`);
       }
-    } else if (newGuesses.length >= 6) {
-      setGameOver(true);
-      setShowSignUp(true);
-      toast.error(`Game Over! The word was ${wordOfTheDay}`);
     } else if (newGuesses.length >= 3) {
       setShowSignUp(true);
     }
@@ -171,6 +161,7 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
         onSuccess={() => setShowSignUp(false)}
         currentScore={guesses.length}
         word={wordOfTheDay}
+        completionTime={calculateCompletionTime()}
       />
     </div>
   );

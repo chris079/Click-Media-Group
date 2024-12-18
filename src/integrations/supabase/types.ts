@@ -13,38 +13,30 @@ export type Database = {
         Row: {
           created_at: string
           email: string
-          email_verified: boolean | null
           id: string
           terms_accepted: boolean
           username: string
-          verification_token: string | null
-          verification_token_expires_at: string | null
         }
         Insert: {
           created_at?: string
           email: string
-          email_verified?: boolean | null
           id?: string
           terms_accepted?: boolean
           username: string
-          verification_token?: string | null
-          verification_token_expires_at?: string | null
         }
         Update: {
           created_at?: string
           email?: string
-          email_verified?: boolean | null
           id?: string
           terms_accepted?: boolean
           username?: string
-          verification_token?: string | null
-          verification_token_expires_at?: string | null
         }
         Relationships: []
       }
       scores: {
         Row: {
           attempts: number
+          completion_time: unknown | null
           created_at: string
           id: string
           profile_id: string | null
@@ -52,6 +44,7 @@ export type Database = {
         }
         Insert: {
           attempts: number
+          completion_time?: unknown | null
           created_at?: string
           id?: string
           profile_id?: string | null
@@ -59,6 +52,7 @@ export type Database = {
         }
         Update: {
           attempts?: number
+          completion_time?: unknown | null
           created_at?: string
           id?: string
           profile_id?: string | null
@@ -80,6 +74,7 @@ export type Database = {
         Row: {
           avg_attempts: number | null
           best_score: number | null
+          best_time: unknown | null
           games_played: number | null
           username: string | null
         }
