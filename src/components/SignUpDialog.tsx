@@ -30,7 +30,26 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
 
     setIsSubmitting(true);
     try {
-      // First create the profile
+      // First check if username or email already exists
+      const { data: existingProfiles, error: checkError } = await supabase
+        .from('profiles')
+        .select('username, email')
+        .or(`username.eq.${username},email.eq.${email}`);
+
+      if (checkError) throw checkError;
+
+      if (existingProfiles && existingProfiles.length > 0) {
+        const existingProfile = existingProfiles[0];
+        if (existingProfile.username === username) {
+          toast.error("This username is already taken. Please choose another one.");
+        } else if (existingProfile.email === email) {
+          toast.error("This email is already registered. Please use another email.");
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
+      // If no existing profile found, proceed with creation
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .insert([
@@ -63,12 +82,8 @@ const SignUpDialog = ({ open, onOpenChange, onSuccess, currentScore, word }: Sig
       toast.success("Successfully registered!");
       onSuccess();
     } catch (error: any) {
-      if (error.message.includes('unique constraint')) {
-        toast.error("Username or email already exists");
-      } else {
-        toast.error("An error occurred. Please try again.");
-      }
       console.error('Error during signup:', error);
+      toast.error("An error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
