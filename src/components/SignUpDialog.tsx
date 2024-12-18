@@ -5,6 +5,7 @@ import UpdatePrompt from './signup/UpdatePrompt';
 import { validateSignUp } from './signup/SignUpValidation';
 import DialogHeader from './signup/DialogHeader';
 import { createProfileAndScore } from './signup/ProfileCreation';
+import { toast } from "sonner";
 
 interface SignUpDialogProps {
   open: boolean;
