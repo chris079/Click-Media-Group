@@ -166,6 +166,7 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
         currentScore={guesses.length}
         word={wordOfTheDay}
         completionTime={calculateCompletionTime()}
+        gameWon={gameWon}
       />
     </div>
   );

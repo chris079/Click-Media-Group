@@ -14,6 +14,7 @@ interface SignUpFormProps {
   setTermsAccepted: (accepted: boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
   isSubmitting: boolean;
+  shouldCheckUsername?: boolean;
 }
 
 const SignUpForm = ({
@@ -24,7 +25,8 @@ const SignUpForm = ({
   termsAccepted,
   setTermsAccepted,
   onSubmit,
-  isSubmitting
+  isSubmitting,
+  shouldCheckUsername = true
 }: SignUpFormProps) => {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
@@ -32,6 +34,7 @@ const SignUpForm = ({
         value={username}
         onChange={setUsername}
         disabled={isSubmitting}
+        shouldCheck={shouldCheckUsername}
       />
       
       <div className="space-y-2">

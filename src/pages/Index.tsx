@@ -39,6 +39,7 @@ const Index = () => {
         open={showSignUp}
         onOpenChange={setShowSignUp}
         onSuccess={() => setShowSignUp(false)}
+        gameWon={false}
       />
     </div>
   );

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import SignUpForm from './signup/SignUpForm';
 import UpdatePrompt from './signup/UpdatePrompt';
+import { validateSignUp } from './signup/SignUpValidation';
 import confetti from 'canvas-confetti';
 
 interface SignUpDialogProps {
@@ -13,7 +14,7 @@ interface SignUpDialogProps {
   currentScore?: number;
   word?: string;
   completionTime?: string;
-  gameWon: boolean; // Add this prop to track if the game was won
+  gameWon?: boolean;
 }
 
 const SignUpDialog = ({ 
@@ -23,7 +24,7 @@ const SignUpDialog = ({
   currentScore, 
   word,
   completionTime,
-  gameWon 
+  gameWon = false
 }: SignUpDialogProps) => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -33,20 +34,8 @@ const SignUpDialog = ({
 
   const createProfileAndScore = async () => {
     try {
-      // Check if username is taken
-      const { data: existingUsername } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', username)
-        .maybeSingle();
-
-      if (existingUsername) {
-        toast.error("This username is already taken. Please choose another one.");
-        return false;
-      }
-
-      // Create new profile with capitalized username
       const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
+      
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .insert([
@@ -73,7 +62,7 @@ const SignUpDialog = ({
       }
 
       // Only save score if game was won
-      if (gameWon && currentScore !== undefined && word && profile && completionTime) {
+      if (gameWon && currentScore !== undefined && word && completionTime) {
         const { error: scoreError } = await supabase
           .from('scores')
           .insert([
@@ -105,30 +94,16 @@ const SignUpDialog = ({
 
     setIsSubmitting(true);
     try {
-      // First check if the email exists with exact username match
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('username')
-        .match({ email: email, username: username })
-        .maybeSingle();
+      const validation = await validateSignUp(email, username);
 
-      if (existingProfile) {
-        // Exact match found, proceed with the game
+      if (validation.isExisting && !validation.shouldUpdate) {
         toast.success("Welcome back!");
         onSuccess();
         return;
       }
 
-      // Check if email exists with different username
-      const { data: emailProfile } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('email', email)
-        .maybeSingle();
-
-      if (emailProfile) {
+      if (validation.shouldUpdate) {
         setShowUpdatePrompt(true);
-        setIsSubmitting(false);
         return;
       }
 
@@ -197,7 +172,7 @@ const SignUpDialog = ({
             setTermsAccepted={setTermsAccepted}
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
-            shouldCheckUsername={!!email} // Only check username if email is filled
+            shouldCheckUsername={!!email}
           />
         )}
       </DialogContent>
