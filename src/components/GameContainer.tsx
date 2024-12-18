@@ -19,6 +19,7 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
   const [gameWon, setGameWon] = useState(false);
   const [wordOfTheDay] = useState('HOUSE');
   const [showSignUp, setShowSignUp] = useState(false);
+  const [signedUp, setSignedUp] = useState(false);
   const [usedLetters, setUsedLetters] = useState<{
     [key: string]: 'correct' | 'present' | 'absent' | undefined;
   }>({});
@@ -28,7 +29,7 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (gameOver) return;
+      if (gameOver || (showSignUp && !signedUp)) return;
       
       if (event.key === 'Enter') {
         submitGuess();
@@ -41,7 +42,7 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentGuess, gameOver]);
+  }, [currentGuess, gameOver, showSignUp, signedUp]);
 
   const shakeScreen = () => {
     setIsShaking(true);
@@ -107,7 +108,7 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
       } else {
         toast.error(`Game Over! The word was ${wordOfTheDay}`);
       }
-    } else if (newGuesses.length >= 3) {
+    } else if (newGuesses.length >= 3 && !signedUp) {
       setShowSignUp(true);
     }
   };
@@ -158,7 +159,10 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
       <SignUpDialog
         open={showSignUp}
         onOpenChange={setShowSignUp}
-        onSuccess={() => setShowSignUp(false)}
+        onSuccess={() => {
+          setShowSignUp(false);
+          setSignedUp(true);
+        }}
         currentScore={guesses.length}
         word={wordOfTheDay}
         completionTime={calculateCompletionTime()}

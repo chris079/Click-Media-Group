@@ -3,13 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface UpdatePromptProps {
-  existingUsername: string;
   onProceed: () => void;
   isSubmitting: boolean;
 }
 
 const UpdatePrompt = ({
-  existingUsername,
   onProceed,
   isSubmitting
 }: UpdatePromptProps) => {
@@ -17,8 +15,8 @@ const UpdatePrompt = ({
     <div className="space-y-4">
       <Alert>
         <AlertDescription>
-          This email was previously used with the username "{existingUsername}". 
-          You can continue with your new username if you'd like.
+          This email is already associated with a different username. 
+          Would you like to continue with your new username?
         </AlertDescription>
       </Alert>
       <div className="flex justify-center">

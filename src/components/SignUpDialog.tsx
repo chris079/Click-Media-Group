@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import SignUpForm from './signup/SignUpForm';
 import UpdatePrompt from './signup/UpdatePrompt';
+import confetti from 'canvas-confetti';
 
 interface SignUpDialogProps {
   open: boolean;
@@ -26,7 +27,6 @@ const SignUpDialog = ({
   const [username, setUsername] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [existingUsername, setExistingUsername] = useState('');
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
 
   const createProfileAndScore = async () => {
@@ -95,15 +95,28 @@ const SignUpDialog = ({
 
     setIsSubmitting(true);
     try {
-      // First check if the email exists
-      const { data: existingEmail } = await supabase
+      // First check if the email exists with exact username match
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('username')
+        .match({ email: email, username: username })
+        .maybeSingle();
+
+      if (existingProfile) {
+        // Exact match found, proceed with the game
+        toast.success("Welcome back!");
+        onSuccess();
+        return;
+      }
+
+      // Check if email exists with different username
+      const { data: emailProfile } = await supabase
         .from('profiles')
         .select('username')
         .eq('email', email)
         .maybeSingle();
 
-      if (existingEmail) {
-        setExistingUsername(existingEmail.username);
+      if (emailProfile) {
         setShowUpdatePrompt(true);
         setIsSubmitting(false);
         return;
@@ -127,6 +140,11 @@ const SignUpDialog = ({
     try {
       const success = await createProfileAndScore();
       if (success) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
         toast.success("Score saved successfully with new username!");
         onSuccess();
       }
@@ -151,7 +169,6 @@ const SignUpDialog = ({
 
         {showUpdatePrompt ? (
           <UpdatePrompt
-            existingUsername={existingUsername}
             onProceed={handleProceedWithNewUsername}
             isSubmitting={isSubmitting}
           />
