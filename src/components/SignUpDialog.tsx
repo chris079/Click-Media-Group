@@ -114,9 +114,13 @@ const SignUpDialog = ({
         .update({ username })
         .eq('email', email)
         .select()
-        .single();
+        .maybeSingle();
 
       if (profileError) throw profileError;
+      if (!profile) {
+        toast.error("Profile not found");
+        return;
+      }
 
       // Save score if game is complete
       if (currentScore !== undefined && word && profile && completionTime) {
