@@ -120,6 +120,31 @@ const Index = () => {
     shareToLinkedIn(shareText);
   };
 
+  const handleSignUp = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
+      });
+      
+      if (error) {
+        if (error.message.includes('rate_limit')) {
+          toast.error("Please wait a minute before requesting another email");
+        } else {
+          toast.error(error.message);
+        }
+        return;
+      }
+      
+      toast.success("Check your email for the login link!");
+      setShowSignUp(false);
+    } catch (error) {
+      toast.error("An unexpected error occurred. Please try again later.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
@@ -175,21 +200,7 @@ const Index = () => {
         <SignUpDialog
           open={showSignUp}
           onOpenChange={setShowSignUp}
-          onSignUp={async (email: string) => {
-            const { error } = await supabase.auth.signInWithOtp({
-              email,
-              options: {
-                emailRedirectTo: window.location.origin,
-              },
-            });
-            
-            if (error) {
-              toast.error(error.message);
-            } else {
-              toast.success("Check your email for the login link!");
-              setShowSignUp(false);
-            }
-          }}
+          onSignUp={handleSignUp}
         />
       </div>
     </div>

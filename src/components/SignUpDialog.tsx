@@ -17,18 +17,23 @@ interface SignUpDialogProps {
 
 const SignUpDialog = ({ open, onOpenChange, onSignUp }: SignUpDialogProps) => {
   const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     try {
       userSchema.parse({ email });
-      onSignUp(email);
+      setIsSubmitting(true);
+      await onSignUp(email);
     } catch (error) {
       if (error instanceof z.ZodError) {
         error.errors.forEach(err => {
           toast.error(err.message);
         });
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -48,9 +53,16 @@ const SignUpDialog = ({ open, onOpenChange, onSignUp }: SignUpDialogProps) => {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
-          <Button type="submit" className="w-full">Continue with Email</Button>
+          <Button 
+            type="submit" 
+            className="w-full"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Sending...' : 'Continue with Email'}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
