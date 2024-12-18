@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import SignUpForm from './signup/SignUpForm';
 import UpdatePrompt from './signup/UpdatePrompt';
 import { validateSignUp } from './signup/SignUpValidation';
-import confetti from 'canvas-confetti';
+import DialogHeader from './signup/DialogHeader';
+import { createProfileAndScore } from './signup/ProfileCreation';
 
 interface SignUpDialogProps {
   open: boolean;
@@ -32,80 +31,6 @@ const SignUpDialog = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
 
-  const createProfileAndScore = async () => {
-    try {
-      const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
-      
-      // First check if this email/username combination already exists
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .match({ email, username: capitalizedUsername })
-        .maybeSingle();
-
-      if (existingProfile) {
-        toast.success("Welcome back!");
-        onSuccess();
-        return true;
-      }
-
-      // Then try to create the new profile
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            email,
-            username: capitalizedUsername,
-            terms_accepted: termsAccepted
-          }
-        ])
-        .select()
-        .maybeSingle();
-
-      if (profileError) {
-        // Handle specific error cases
-        if (profileError.code === '23505') {
-          if (profileError.message?.includes('profiles_email_key')) {
-            toast.error("This email is already registered with a different username");
-            return false;
-          }
-          if (profileError.message?.includes('profiles_username_key')) {
-            toast.error("This username is already taken by another user");
-            return false;
-          }
-        }
-        throw profileError;
-      }
-
-      if (!profile) {
-        toast.error("Failed to create profile");
-        return false;
-      }
-
-      // Only save score if game was won
-      if (gameWon && currentScore !== undefined && word && completionTime) {
-        const { error: scoreError } = await supabase
-          .from('scores')
-          .insert([
-            {
-              profile_id: profile.id,
-              word,
-              attempts: currentScore,
-              completion_time: completionTime
-            }
-          ]);
-
-        if (scoreError) throw scoreError;
-      }
-
-      return true;
-    } catch (error: any) {
-      console.error('Error creating profile:', error);
-      toast.error(error.message || "An error occurred while creating profile");
-      return false;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !email || !termsAccepted) {
@@ -118,7 +43,6 @@ const SignUpDialog = ({
       const validation = await validateSignUp(email, username);
 
       if (validation.isExisting && !validation.shouldUpdate) {
-        toast.success("Welcome back!");
         onSuccess();
         return;
       }
@@ -128,16 +52,16 @@ const SignUpDialog = ({
         return;
       }
 
-      const success = await createProfileAndScore();
-      if (success) {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-        toast.success("Profile created successfully!");
-        onSuccess();
-      }
+      await createProfileAndScore({
+        email,
+        username,
+        termsAccepted,
+        gameWon,
+        currentScore,
+        word,
+        completionTime,
+        onSuccess
+      });
     } catch (error: any) {
       console.error('Error during signup:', error);
       toast.error(error.message || "An error occurred during signup");
@@ -149,16 +73,16 @@ const SignUpDialog = ({
   const handleProceedWithNewUsername = async () => {
     setIsSubmitting(true);
     try {
-      const success = await createProfileAndScore();
-      if (success) {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-        toast.success("Score saved successfully with new username!");
-        onSuccess();
-      }
+      await createProfileAndScore({
+        email,
+        username,
+        termsAccepted,
+        gameWon,
+        currentScore,
+        word,
+        completionTime,
+        onSuccess
+      });
     } catch (error: any) {
       console.error('Error creating profile:', error);
       toast.error(error.message || "An error occurred while creating profile");
@@ -171,13 +95,8 @@ const SignUpDialog = ({
   return (
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Want to see your name climb to the top?</DialogTitle>
-          <DialogDescription>
-            Add your username and email to save your scores, compete with others, and claim your spot on the leaderboard.
-          </DialogDescription>
-        </DialogHeader>
-
+        <DialogHeader />
+        
         {showUpdatePrompt ? (
           <UpdatePrompt
             onProceed={handleProceedWithNewUsername}

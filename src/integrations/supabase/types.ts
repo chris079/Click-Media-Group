@@ -39,6 +39,7 @@ export type Database = {
           completion_time: unknown | null
           created_at: string
           id: string
+          is_win: boolean
           profile_id: string | null
           word: string
         }
@@ -47,6 +48,7 @@ export type Database = {
           completion_time?: unknown | null
           created_at?: string
           id?: string
+          is_win?: boolean
           profile_id?: string | null
           word: string
         }
@@ -55,6 +57,7 @@ export type Database = {
           completion_time?: unknown | null
           created_at?: string
           id?: string
+          is_win?: boolean
           profile_id?: string | null
           word?: string
         }
@@ -78,6 +81,7 @@ export type Database = {
           best_score: number | null
           games_played: number | null
           username: string | null
+          wins: number | null
         }
         Relationships: []
       }
