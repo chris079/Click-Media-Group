@@ -1,4 +1,4 @@
-import { Settings, BarChart2, Menu, X } from 'lucide-react';
+import { Settings, BarChart2, Menu } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useState } from 'react';
@@ -27,10 +27,12 @@ const GameHeader = () => {
               <SheetTitle>Menu</SheetTitle>
             </SheetHeader>
             <div className="flex flex-col gap-4 mt-4">
-              <Button variant="ghost" size="lg" className="justify-start" onClick={() => setIsOpen(false)}>
-                <Settings className="h-5 w-5 mr-2" />
-                Settings
-              </Button>
+              <Link to="/settings" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" size="lg" className="w-full justify-start">
+                  <Settings className="h-5 w-5 mr-2" />
+                  Settings
+                </Button>
+              </Link>
               <Link to="/leaderboard" onClick={() => setIsOpen(false)}>
                 <Button variant="ghost" size="lg" className="w-full justify-start">
                   <BarChart2 className="h-5 w-5 mr-2" />
@@ -42,9 +44,11 @@ const GameHeader = () => {
         </Sheet>
 
         <div className="hidden md:flex gap-2">
-          <Button variant="ghost" size="icon">
-            <Settings className="h-6 w-6" />
-          </Button>
+          <Link to="/settings">
+            <Button variant="ghost" size="icon">
+              <Settings className="h-6 w-6" />
+            </Button>
+          </Link>
         </div>
 
         <a 
