@@ -49,6 +49,26 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
     fetchDailyWord();
   }, []);
 
+  // Add keyboard event listener
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (gameOver || showSignUp) return;
+
+      if (event.key === 'Enter') {
+        if (currentGuess.length === 5) {
+          submitGuess();
+        }
+      } else if (event.key === 'Backspace') {
+        setCurrentGuess(prev => prev.slice(0, -1));
+      } else if (/^[a-zA-Z]$/.test(event.key) && currentGuess.length < 5) {
+        setCurrentGuess(prev => prev + event.key.toUpperCase());
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentGuess, gameOver, showSignUp]);
+
   const calculateCompletionTime = (): string => {
     const endTime = new Date();
     const timeDiff = endTime.getTime() - startTime.getTime();
