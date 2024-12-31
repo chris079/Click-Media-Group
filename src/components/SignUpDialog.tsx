@@ -34,13 +34,22 @@ const SignUpDialog = ({
     <Dialog 
       open={open} 
       onOpenChange={(isOpen) => {
-        // Only allow closing if we're opening the dialog or if form is submitted
-        if (isOpen || !isSubmitting) {
+        // Only allow closing through the success callback
+        if (isOpen) {
           onOpenChange(isOpen);
         }
       }}
+      modal={true}
     >
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent 
+        className="sm:max-w-[425px]"
+        onPointerDownOutside={(e) => {
+          e.preventDefault();
+        }}
+        onEscapeKeyDown={(e) => {
+          e.preventDefault();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Sign up to save your progress!</DialogTitle>
         </DialogHeader>
