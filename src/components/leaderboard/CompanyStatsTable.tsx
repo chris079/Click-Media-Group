@@ -64,9 +64,9 @@ const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTabl
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-16 text-left">Rank</TableHead>
+            <TableHead className="w-16">Rank</TableHead>
             <TableHead 
-              className="cursor-pointer text-left"
+              className="cursor-pointer"
               onClick={() => onRequestSort('company')}
             >
               Company 
@@ -75,7 +75,7 @@ const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTabl
               </span>
             </TableHead>
             <TableHead 
-              className="text-left cursor-pointer"
+              className="cursor-pointer"
               onClick={() => onRequestSort('avg_completion_time')}
             >
               Average Time 
@@ -84,7 +84,7 @@ const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTabl
               </span>
             </TableHead>
             <TableHead 
-              className="text-left cursor-pointer"
+              className="cursor-pointer"
               onClick={() => onRequestSort('games_played')}
             >
               Games Played 
@@ -93,7 +93,7 @@ const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTabl
               </span>
             </TableHead>
             <TableHead 
-              className="text-left cursor-pointer"
+              className="cursor-pointer"
               onClick={() => onRequestSort('avg_attempts')}
             >
               Average Attempts 

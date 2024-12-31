@@ -71,9 +71,9 @@ const TodayScoresTable = ({ data, sortConfig, onRequestSort }: TodayScoresTableP
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-16 text-left">Rank</TableHead>
+            <TableHead className="w-16">Rank</TableHead>
             <TableHead 
-              className="cursor-pointer text-left"
+              className="cursor-pointer"
               onClick={() => onRequestSort('username')}
             >
               Username 
@@ -82,7 +82,7 @@ const TodayScoresTable = ({ data, sortConfig, onRequestSort }: TodayScoresTableP
               </span>
             </TableHead>
             <TableHead 
-              className="text-left cursor-pointer"
+              className="cursor-pointer"
               onClick={() => onRequestSort('completion_time')}
             >
               Time 
@@ -91,7 +91,7 @@ const TodayScoresTable = ({ data, sortConfig, onRequestSort }: TodayScoresTableP
               </span>
             </TableHead>
             <TableHead 
-              className="text-left cursor-pointer"
+              className="cursor-pointer"
               onClick={() => onRequestSort('attempts')}
             >
               Attempts 
