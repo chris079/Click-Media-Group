@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Home, BarChart2 } from 'lucide-react';
+import { ArrowLeft, Home, BarChart2, FileText } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import TermsAndConditions from '@/components/settings/TermsAndConditions';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -26,7 +26,7 @@ const Settings = () => {
               <ArrowLeft className="h-6 w-6" />
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-left">Settings</h1>
+          <h1 className="text-3xl font-bold text-left">Terms and Conditions</h1>
         </div>
         <div className="flex gap-2">
           <Link to="/">

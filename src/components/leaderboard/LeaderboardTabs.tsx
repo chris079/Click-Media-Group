@@ -22,21 +22,25 @@ const LeaderboardTabs = ({
   sortConfig, 
   onRequestSort 
 }: LeaderboardTabsProps) => {
-  // Set initial sort config based on active tab
+  // Set initial sort config for fastest times first
   React.useEffect(() => {
     if (!sortConfig) {
       onRequestSort('completion_time');
     }
-  }, [sortConfig, onRequestSort]);
+  }, []);
 
   const handleTabChange = (value: string) => {
     switch(value) {
       case 'today':
-        onRequestSort('completion_time');
+        if (!sortConfig || sortConfig.direction === 'desc') {
+          onRequestSort('completion_time');
+        }
         break;
       case 'alltime':
       case 'companies':
-        onRequestSort('avg_completion_time');
+        if (!sortConfig || sortConfig.direction === 'desc') {
+          onRequestSort('avg_completion_time');
+        }
         break;
     }
   };
