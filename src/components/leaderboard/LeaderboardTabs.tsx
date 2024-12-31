@@ -22,15 +22,27 @@ const LeaderboardTabs = ({
   sortConfig, 
   onRequestSort 
 }: LeaderboardTabsProps) => {
-  // Set initial sort config for completion time
+  // Set initial sort config based on active tab
   React.useEffect(() => {
     if (!sortConfig) {
       onRequestSort('completion_time');
     }
   }, [sortConfig, onRequestSort]);
 
+  const handleTabChange = (value: string) => {
+    switch(value) {
+      case 'today':
+        onRequestSort('completion_time');
+        break;
+      case 'alltime':
+      case 'companies':
+        onRequestSort('avg_completion_time');
+        break;
+    }
+  };
+
   return (
-    <Tabs defaultValue="today" className="w-full">
+    <Tabs defaultValue="today" className="w-full" onValueChange={handleTabChange}>
       <TabsList className="grid w-full grid-cols-3 mb-4">
         <TabsTrigger value="today">Today</TabsTrigger>
         <TabsTrigger value="alltime">All Time</TabsTrigger>

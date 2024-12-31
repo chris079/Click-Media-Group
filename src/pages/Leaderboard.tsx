@@ -51,14 +51,34 @@ const Leaderboard = () => {
     if (!sortConfig) return data;
 
     return [...data].sort((a, b) => {
-      if (a[sortConfig.key] < b[sortConfig.key]) {
+      let aValue = a[sortConfig.key];
+      let bValue = b[sortConfig.key];
+      
+      // Convert interval strings to seconds for comparison if dealing with completion_time
+      if (sortConfig.key === 'completion_time' && typeof aValue === 'string') {
+        aValue = intervalToSeconds(aValue);
+        bValue = intervalToSeconds(bValue);
+      }
+
+      if (aValue < bValue) {
         return sortConfig.direction === 'asc' ? -1 : 1;
       }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
+      if (aValue > bValue) {
         return sortConfig.direction === 'asc' ? 1 : -1;
       }
       return 0;
     });
+  };
+
+  const intervalToSeconds = (interval: string): number => {
+    if (!interval) return Infinity;
+    
+    if (interval.includes(':')) {
+      const [hours, minutes, seconds] = interval.split(':').map(Number);
+      return hours * 3600 + minutes * 60 + seconds;
+    }
+    
+    return parseInt(interval.split(' ')[0]);
   };
 
   const requestSort = (key: string) => {
