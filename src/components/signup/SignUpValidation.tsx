@@ -1,27 +1,42 @@
 import { supabase } from "@/integrations/supabase/client";
 
+export const validateEmail = async (email: string) => {
+  try {
+    const { data, error } = await supabase.functions.invoke('validate-email', {
+      body: { email }
+    });
+
+    if (error) throw error;
+    return data.valid;
+  } catch (error) {
+    console.error('Error validating email:', error);
+    return false;
+  }
+};
+
 export const validateSignUp = async (email: string, username: string) => {
-  // First check if the email exists with exact username match
+  // First validate email format and domain
+  const isEmailValid = await validateEmail(email);
+  if (!isEmailValid) {
+    throw new Error("Please enter a valid email address");
+  }
+
+  // Check if username exists and get associated email
   const { data: existingProfile } = await supabase
     .from('profiles')
-    .select('username')
-    .match({ email: email, username: username })
+    .select('email')
+    .eq('username', username)
     .maybeSingle();
 
-  if (existingProfile) {
+  if (!existingProfile) {
+    return { isExisting: false, shouldUpdate: false };
+  }
+
+  // If username exists, check if email matches
+  if (existingProfile.email === email) {
     return { isExisting: true, shouldUpdate: false };
   }
 
-  // Check if email exists with different username
-  const { data: emailProfile } = await supabase
-    .from('profiles')
-    .select('username')
-    .eq('email', email)
-    .maybeSingle();
-
-  if (emailProfile) {
-    return { isExisting: true, shouldUpdate: true };
-  }
-
-  return { isExisting: false, shouldUpdate: false };
+  // Username exists but email doesn't match
+  return { isExisting: true, shouldUpdate: true };
 };

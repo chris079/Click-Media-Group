@@ -44,6 +44,7 @@ const SignUpDialog = ({
       const validation = await validateSignUp(email, username);
 
       if (validation.isExisting && !validation.shouldUpdate) {
+        toast.success("Welcome back!");
         onSuccess();
         return;
       }
@@ -71,30 +72,13 @@ const SignUpDialog = ({
     }
   };
 
-  const handleProceedWithNewUsername = async () => {
-    setIsSubmitting(true);
-    try {
-      await createProfileAndScore({
-        email,
-        username,
-        termsAccepted,
-        gameWon,
-        currentScore,
-        word,
-        completionTime,
-        onSuccess
-      });
-    } catch (error: any) {
-      console.error('Error creating profile:', error);
-      toast.error(error.message || "An error occurred while creating profile");
-    } finally {
-      setIsSubmitting(false);
-      setShowUpdatePrompt(false);
-    }
+  const handleProceedWithNewUsername = () => {
+    setShowUpdatePrompt(false);
+    setUsername('');
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader />
         
@@ -113,7 +97,7 @@ const SignUpDialog = ({
             setTermsAccepted={setTermsAccepted}
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
-            shouldCheckUsername={!!email}
+            shouldCheckUsername={false}
           />
         )}
       </DialogContent>

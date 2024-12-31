@@ -13,10 +13,10 @@ const UpdatePrompt = ({
 }: UpdatePromptProps) => {
   return (
     <div className="space-y-4">
-      <Alert>
+      <Alert variant="destructive">
         <AlertDescription>
-          This email is already associated with a different username. 
-          Would you like to continue with your new username?
+          This username is already taken by another user. 
+          Please choose a different username to continue.
         </AlertDescription>
       </Alert>
       <div className="flex justify-center">
@@ -25,7 +25,7 @@ const UpdatePrompt = ({
           disabled={isSubmitting}
           className="w-full"
         >
-          Continue with New Username
+          Choose Different Username
         </Button>
       </div>
     </div>
