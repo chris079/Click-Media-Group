@@ -20,10 +20,8 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
 
   const handleGameOver = (won: boolean, time: string) => {
     setCompletionTime(time);
-    if (won && !signedUp) {
-      setTimeout(() => {
-        setShowSignUp(true);
-      }, 3000);
+    if (won && !session) {
+      setShowSignUp(true);
     }
   };
 
@@ -132,6 +130,19 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
           />
         </>
       )}
+
+      <SignUpDialog
+        open={showSignUp}
+        onOpenChange={setShowSignUp}
+        onSuccess={() => {
+          setSignedUp(true);
+          setShowSignUp(false);
+        }}
+        currentScore={guesses.length}
+        word={wordOfTheDay}
+        completionTime={completionTime}
+        gameWon={gameWon}
+      />
     </div>
   );
 };
