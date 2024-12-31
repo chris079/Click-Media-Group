@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,24 +8,51 @@ import {
 import SignUpForm from './auth/SignUpForm';
 
 interface SignUpDialogProps {
-  isOpen: boolean;
+  open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
+  currentScore?: number;
+  word?: string;
+  completionTime?: string;
+  gameWon?: boolean;
 }
 
-const SignUpDialog = ({ isOpen, onOpenChange }: SignUpDialogProps) => {
+const SignUpDialog = ({ 
+  open, 
+  onOpenChange,
+  onSuccess,
+  currentScore,
+  word,
+  completionTime,
+  gameWon
+}: SignUpDialogProps) => {
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   return (
     <Dialog 
-      open={isOpen} 
-      onOpenChange={(open) => {
-        // Only allow closing if we're opening the dialog
-        if (open) onOpenChange(open);
+      open={open} 
+      onOpenChange={(isOpen) => {
+        // Only allow closing if we're opening the dialog or if form is submitted
+        if (isOpen || !isSubmitting) {
+          onOpenChange(isOpen);
+        }
       }}
     >
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Sign up to save your progress!</DialogTitle>
         </DialogHeader>
-        <SignUpForm onSuccess={() => onOpenChange(false)} />
+        <SignUpForm 
+          email={email}
+          setEmail={setEmail}
+          emailError={emailError}
+          isSubmitting={isSubmitting}
+          onSuccess={onSuccess}
+          currentScore={currentScore}
+          word={word}
+        />
       </DialogContent>
     </Dialog>
   );
