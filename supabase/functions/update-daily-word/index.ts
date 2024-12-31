@@ -1,6 +1,18 @@
 // Follow Deno Edge Function conventions
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { propertyWords } from "../../../src/data/propertyWords";
+
+// Include property words directly in the edge function
+const propertyWords = [
+  "AGENT", "ALARM", "APART", "ATTIC", "BANKS", "BLOCK", "BRICK", "BUILD", 
+  "CHAIN", "CHEAP", "CLEAN", "CLOSE", "COURT", "DEEDS", "DELTA", "DOORS", 
+  "DRIVE", "EAVES", "ELITE", "ENTRY", "FIXED", "FLOOR", "FRAME", "FRONT", 
+  "GATES", "GRAND", "GRANT", "GREEN", "GROSS", "GUIDE", "HALLS", "HANDY", 
+  "HOUSE", "INDEX", "LEASE", "LEVEL", "LIGHT", "LINKS", "LOANS", "MAJOR", 
+  "METRO", "MEWS", "NORTH", "OFFER", "OPEN", "ORDER", "OWNER", "PLACE", 
+  "PLAZA", "PRICE", "PRIME", "QUOTE", "RATES", "RENTS", "RIVER", "ROYAL", 
+  "SPACE", "STATE", "STOCK", "STORE", "STYLE", "SUITE", "TOWER", "VALUE", 
+  "URBAN", "ADDED", "SMART", "PITCH", "TRACK", "SCALE", "WORTH", "SITE"
+];
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

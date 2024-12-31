@@ -1,8 +1,8 @@
--- Schedule the function to run at midnight UK time
+-- Schedule the function to run at midnight UK time (1 AM UTC during BST, midnight UTC during GMT)
 select
   cron.schedule(
     'update-daily-word-midnight-uk',
-    '0 0 * * *', -- At midnight
+    '0 0 * * *', -- At midnight UTC
     $$
     select
       net.http_post(
