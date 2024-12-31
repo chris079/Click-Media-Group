@@ -25,7 +25,7 @@ export const validateSignUp = async (email: string, username: string) => {
   const { data: existingProfile } = await supabase
     .from('profiles')
     .select('email')
-    .eq('username', username)
+    .eq('username', username.charAt(0).toUpperCase() + username.slice(1))
     .maybeSingle();
 
   if (!existingProfile) {

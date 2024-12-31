@@ -15,7 +15,7 @@ const UpdatePrompt = ({
     <div className="space-y-4">
       <Alert variant="destructive">
         <AlertDescription>
-          This username is already taken by another user. 
+          This username is already associated with a different email address. 
           Please choose a different username to continue.
         </AlertDescription>
       </Alert>
