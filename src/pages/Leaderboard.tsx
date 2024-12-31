@@ -1,23 +1,43 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import LeaderboardHeader from "@/components/leaderboard/LeaderboardHeader";
-import LeaderboardTable from "@/components/leaderboard/LeaderboardTable";
+import LeaderboardTabs from "@/components/leaderboard/LeaderboardTabs";
 import ClickPromotion from "@/components/leaderboard/ClickPromotion";
 
 const Leaderboard = () => {
-  const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState<{
     key: string;
     direction: 'asc' | 'desc';
   } | null>(null);
 
-  const { data: leaderboardData, isLoading } = useQuery({
+  const { data: leaderboardData, isLoading: isLoadingLeaderboard } = useQuery({
     queryKey: ['leaderboard'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('leaderboard')
+        .select('*');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: todayScores, isLoading: isLoadingToday } = useQuery({
+    queryKey: ['today_scores'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('today_scores')
+        .select('*');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: companyStats, isLoading: isLoadingCompany } = useQuery({
+    queryKey: ['company_stats'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('company_stats')
         .select('*');
       if (error) throw error;
       return data;
@@ -46,34 +66,23 @@ const Leaderboard = () => {
     setSortConfig({ key, direction });
   };
 
-  const filteredData = leaderboardData
-    ? sortData(leaderboardData.filter(entry => 
-        entry.username.toLowerCase().includes(search.toLowerCase())
-      )).map(entry => ({
-        ...entry,
-        username: entry.username.charAt(0).toUpperCase() + entry.username.slice(1)
-      }))
-    : [];
-
-  if (isLoading) return (
+  if (isLoadingLeaderboard || isLoadingToday || isLoadingCompany) return (
     <div className="flex justify-center items-center min-h-screen">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
     </div>
   );
 
+  const sortedLeaderboardData = leaderboardData ? sortData(leaderboardData) : [];
+  const sortedTodayScores = todayScores ? sortData(todayScores) : [];
+  const sortedCompanyStats = companyStats ? sortData(companyStats) : [];
+
   return (
     <div className="container mx-auto py-8 px-4">
       <LeaderboardHeader />
-      <div className="mb-4">
-        <Input
-          placeholder="Search by username..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-sm"
-        />
-      </div>
-      <LeaderboardTable 
-        data={filteredData}
+      <LeaderboardTabs 
+        leaderboardData={sortedLeaderboardData}
+        todayScores={sortedTodayScores}
+        companyStats={sortedCompanyStats}
         sortConfig={sortConfig}
         onRequestSort={requestSort}
       />

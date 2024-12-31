@@ -94,6 +94,16 @@ export type Database = {
       }
     }
     Views: {
+      company_stats: {
+        Row: {
+          avg_attempts: number | null
+          avg_completion_time: number | null
+          company: string | null
+          games_played: number | null
+          players: number | null
+        }
+        Relationships: []
+      }
       leaderboard: {
         Row: {
           avg_attempts: number | null
@@ -103,6 +113,15 @@ export type Database = {
           games_played: number | null
           username: string | null
           wins: number | null
+        }
+        Relationships: []
+      }
+      today_scores: {
+        Row: {
+          attempts: number | null
+          completion_time: unknown | null
+          username: string | null
+          word: string | null
         }
         Relationships: []
       }
