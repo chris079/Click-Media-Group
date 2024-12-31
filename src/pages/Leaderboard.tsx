@@ -4,6 +4,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatDuration } from 'date-fns';
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Settings, Share } from 'lucide-react';
+import { shareToLinkedIn } from '@/utils/shareUtils';
 
 const Leaderboard = () => {
   const [search, setSearch] = useState("");
@@ -69,7 +72,26 @@ const Leaderboard = () => {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">Leaderboard</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Leaderboard</h1>
+        <div className="flex gap-2">
+          <Button variant="outline" size="icon">
+            <Settings className="h-6 w-6" />
+          </Button>
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={() => {
+              const shareText = "Check out the Property Wordle leaderboard! Can you make it to the top?";
+              shareToLinkedIn(shareText);
+            }}
+          >
+            <Share className="h-5 w-5" />
+            Share
+          </Button>
+        </div>
+      </div>
+
       <div className="mb-4">
         <Input
           placeholder="Search by username..."
@@ -143,6 +165,20 @@ const Leaderboard = () => {
             ))}
           </TableBody>
         </Table>
+      </div>
+      <div className="mt-12 bg-gray-50 rounded-lg p-8 text-center">
+        <h2 className="text-2xl font-semibold mb-4">Discover Click Media Group</h2>
+        <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+          Want to make your property listings as engaging as this game? 
+          Click Media Group specializes in creating scroll-stopping content 
+          that captures attention and drives results.
+        </p>
+        <Button 
+          className="bg-[#00A5E5] hover:bg-[#0094CE] text-white"
+          onClick={() => window.open('https://www.clickmediagroup.co.uk', '_blank')}
+        >
+          Learn More About Click
+        </Button>
       </div>
     </div>
   );
