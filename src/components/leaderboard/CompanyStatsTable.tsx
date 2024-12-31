@@ -27,6 +27,13 @@ const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTabl
     }, { format: ['minutes', 'seconds'] });
   };
 
+  const formatCompanyName = (company: string) => {
+    return company
+      .replace(/\.(com|co\.uk|net|org)$/i, '')  // Remove common domain extensions
+      .replace(/\s+/g, ' ')  // Remove extra spaces
+      .trim();
+  };
+
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <Table>
@@ -61,7 +68,7 @@ const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTabl
         <TableBody>
           {data.map((entry, index) => (
             <TableRow key={index}>
-              <TableCell className="font-medium">{entry.company}</TableCell>
+              <TableCell className="font-medium">{formatCompanyName(entry.company)}</TableCell>
               <TableCell className="text-right">
                 {formatTime(entry.avg_completion_time)}
               </TableCell>

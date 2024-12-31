@@ -76,7 +76,7 @@ const TodayScoresTable = ({ data, sortConfig, onRequestSort }: TodayScoresTableP
                 {entry.username}
               </TableCell>
               <TableCell className="text-right">
-                {formatTime(entry.completion_time)}
+                {formatTime(Number(entry.completion_time))}
               </TableCell>
               <TableCell className="text-right">
                 {entry.attempts}
