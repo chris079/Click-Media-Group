@@ -22,7 +22,6 @@ const TodayScoresTable = ({ data, sortConfig, onRequestSort }: TodayScoresTableP
   const formatTime = (timeString: string) => {
     if (!timeString) return 'N/A';
     
-    // Parse the interval string (e.g., "00:01:30" or "90 seconds")
     let totalSeconds: number;
     if (timeString.includes(':')) {
       const [hours, minutes, seconds] = timeString.split(':').map(Number);
@@ -41,7 +40,20 @@ const TodayScoresTable = ({ data, sortConfig, onRequestSort }: TodayScoresTableP
     return `${minutes}m ${remainingSeconds}s`;
   };
 
-  const getMedalColor = (index: number) => {
+  const getMedalColor = (completionTime: string, allTimes: string[]) => {
+    const sortedTimes = [...new Set(allTimes)]
+      .filter(time => time) // Remove null/undefined values
+      .sort((a, b) => {
+      const timeA = a.includes(':') ? 
+        a.split(':').reduce((acc, time) => acc * 60 + parseInt(time), 0) :
+        parseInt(a.split(' ')[0]);
+      const timeB = b.includes(':') ? 
+        b.split(':').reduce((acc, time) => acc * 60 + parseInt(time), 0) :
+        parseInt(b.split(' ')[0]);
+      return timeA - timeB;
+    });
+
+    const index = sortedTimes.indexOf(completionTime);
     switch(index) {
       case 0: return "text-yellow-500";
       case 1: return "text-gray-400";
@@ -50,30 +62,20 @@ const TodayScoresTable = ({ data, sortConfig, onRequestSort }: TodayScoresTableP
     }
   };
 
-  const getRankDisplay = (index: number) => {
-    const rank = index + 1;
-    return (
-      <div className="flex items-start gap-2">
-        <span>{rank}</span>
-        {index < 3 && (
-          <Award className={`h-4 w-4 ${getMedalColor(index)}`} />
-        )}
-      </div>
-    );
-  };
-
   const capitalizeFirstLetter = (string: string) => {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
+
+  const allCompletionTimes = data.map(entry => entry.completion_time);
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-16">Rank</TableHead>
+            <TableHead className="w-16 text-left">Rank</TableHead>
             <TableHead 
-              className="cursor-pointer"
+              className="cursor-pointer text-left"
               onClick={() => onRequestSort('username')}
             >
               Username 
@@ -82,7 +84,7 @@ const TodayScoresTable = ({ data, sortConfig, onRequestSort }: TodayScoresTableP
               </span>
             </TableHead>
             <TableHead 
-              className="cursor-pointer"
+              className="cursor-pointer text-left"
               onClick={() => onRequestSort('completion_time')}
             >
               Time 
@@ -91,7 +93,7 @@ const TodayScoresTable = ({ data, sortConfig, onRequestSort }: TodayScoresTableP
               </span>
             </TableHead>
             <TableHead 
-              className="cursor-pointer"
+              className="cursor-pointer text-left"
               onClick={() => onRequestSort('attempts')}
             >
               Attempts 
@@ -102,20 +104,26 @@ const TodayScoresTable = ({ data, sortConfig, onRequestSort }: TodayScoresTableP
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((entry, index) => (
-            <TableRow key={index}>
-              <TableCell>{getRankDisplay(index)}</TableCell>
-              <TableCell className="font-medium">
-                {capitalizeFirstLetter(entry.username)}
-              </TableCell>
-              <TableCell>
-                {formatTime(entry.completion_time)}
-              </TableCell>
-              <TableCell>
-                {Math.round(entry.attempts)}
-              </TableCell>
-            </TableRow>
-          ))}
+          {data.map((entry, index) => {
+            const medalColor = getMedalColor(entry.completion_time, allCompletionTimes);
+            return (
+              <TableRow key={index}>
+                <TableCell className="text-left">{index + 1}</TableCell>
+                <TableCell className="font-medium text-left flex items-center gap-2">
+                  {capitalizeFirstLetter(entry.username)}
+                  {medalColor && (
+                    <Award className={`h-4 w-4 ${medalColor}`} />
+                  )}
+                </TableCell>
+                <TableCell className="text-left">
+                  {formatTime(entry.completion_time)}
+                </TableCell>
+                <TableCell className="text-left">
+                  {entry.attempts}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

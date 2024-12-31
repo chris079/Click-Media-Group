@@ -38,7 +38,12 @@ const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTabl
       .join(' ');
   };
 
-  const getMedalColor = (index: number) => {
+  const getMedalColor = (avgTime: number, allTimes: number[]) => {
+    const sortedTimes = [...new Set(allTimes)]
+      .filter(time => time) // Remove null/undefined values
+      .sort((a, b) => a - b);
+
+    const index = sortedTimes.indexOf(avgTime);
     switch(index) {
       case 0: return "text-yellow-500";
       case 1: return "text-gray-400";
@@ -47,26 +52,16 @@ const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTabl
     }
   };
 
-  const getRankDisplay = (index: number) => {
-    const rank = index + 1;
-    return (
-      <div className="flex items-start gap-2">
-        <span>{rank}</span>
-        {index < 3 && (
-          <Award className={`h-4 w-4 ${getMedalColor(index)}`} />
-        )}
-      </div>
-    );
-  };
+  const allAvgTimes = data.map(entry => entry.avg_completion_time);
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-16">Rank</TableHead>
+            <TableHead className="w-16 text-left">Rank</TableHead>
             <TableHead 
-              className="cursor-pointer"
+              className="cursor-pointer text-left"
               onClick={() => onRequestSort('company')}
             >
               Company 
@@ -75,7 +70,7 @@ const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTabl
               </span>
             </TableHead>
             <TableHead 
-              className="cursor-pointer"
+              className="cursor-pointer text-left"
               onClick={() => onRequestSort('avg_completion_time')}
             >
               Average Time 
@@ -84,7 +79,7 @@ const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTabl
               </span>
             </TableHead>
             <TableHead 
-              className="cursor-pointer"
+              className="cursor-pointer text-left"
               onClick={() => onRequestSort('games_played')}
             >
               Games Played 
@@ -93,7 +88,7 @@ const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTabl
               </span>
             </TableHead>
             <TableHead 
-              className="cursor-pointer"
+              className="cursor-pointer text-left"
               onClick={() => onRequestSort('avg_attempts')}
             >
               Average Attempts 
@@ -104,23 +99,29 @@ const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTabl
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((entry, index) => (
-            <TableRow key={index}>
-              <TableCell>{getRankDisplay(index)}</TableCell>
-              <TableCell className="font-medium">
-                {formatCompanyName(entry.company)}
-              </TableCell>
-              <TableCell>
-                {formatTime(entry.avg_completion_time)}
-              </TableCell>
-              <TableCell>
-                {entry.games_played}
-              </TableCell>
-              <TableCell>
-                {Math.round(entry.avg_attempts)}
-              </TableCell>
-            </TableRow>
-          ))}
+          {data.map((entry, index) => {
+            const medalColor = getMedalColor(entry.avg_completion_time, allAvgTimes);
+            return (
+              <TableRow key={index}>
+                <TableCell className="text-left">{index + 1}</TableCell>
+                <TableCell className="font-medium text-left flex items-center gap-2">
+                  {formatCompanyName(entry.company)}
+                  {medalColor && (
+                    <Award className={`h-4 w-4 ${medalColor}`} />
+                  )}
+                </TableCell>
+                <TableCell className="text-left">
+                  {formatTime(entry.avg_completion_time)}
+                </TableCell>
+                <TableCell className="text-left">
+                  {entry.games_played}
+                </TableCell>
+                <TableCell className="text-left">
+                  {Math.round(entry.avg_attempts)}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

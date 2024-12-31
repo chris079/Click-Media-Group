@@ -31,28 +31,28 @@ const ShareButtons = () => {
         size="icon"
         onClick={() => handleShare('linkedin')}
       >
-        <LinkedinIcon className="h-5 w-5 fill-current" />
+        <LinkedinIcon className="h-5 w-5" />
       </Button>
       <Button 
         variant="outline" 
         size="icon"
         onClick={() => handleShare('twitter')}
       >
-        <Twitter className="h-5 w-5 fill-current" />
+        <Twitter className="h-5 w-5" />
       </Button>
       <Button 
         variant="outline" 
         size="icon"
         onClick={() => handleShare('facebook')}
       >
-        <Facebook className="h-5 w-5 fill-current" />
+        <Facebook className="h-5 w-5" />
       </Button>
       <Button 
         variant="outline" 
         size="icon"
         onClick={() => handleShare('email')}
       >
-        <Mail className="h-5 w-5 fill-current" />
+        <Mail className="h-5 w-5" />
       </Button>
     </div>
   );
