@@ -21,7 +21,10 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
   const handleGameOver = (won: boolean, time: string) => {
     setCompletionTime(time);
     if (won && !session) {
-      setShowSignUp(true);
+      // Add 3-second delay before showing the signup dialog
+      setTimeout(() => {
+        setShowSignUp(true);
+      }, 3000);
     }
   };
 
