@@ -1,12 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatDuration } from 'date-fns';
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Settings, Share, Facebook, Twitter, Mail, LinkedinIcon } from 'lucide-react';
-import { shareToLinkedIn } from '@/utils/shareUtils';
+import LeaderboardHeader from "@/components/leaderboard/LeaderboardHeader";
+import LeaderboardTable from "@/components/leaderboard/LeaderboardTable";
+import ClickPromotion from "@/components/leaderboard/ClickPromotion";
 
 const Leaderboard = () => {
   const [search, setSearch] = useState("");
@@ -25,13 +23,6 @@ const Leaderboard = () => {
       return data;
     },
   });
-
-  const formatTime = (seconds: number) => {
-    if (!seconds) return 'N/A';
-    return formatDuration({
-      seconds: Math.floor(seconds)
-    }, { format: ['minutes', 'seconds'] });
-  };
 
   const sortData = (data: any[]) => {
     if (!sortConfig) return data;
@@ -64,26 +55,6 @@ const Leaderboard = () => {
       }))
     : [];
 
-  const handleShare = (platform: 'linkedin' | 'twitter' | 'facebook' | 'email') => {
-    const shareText = "Check out the Property Wordle leaderboard! Can you make it to the top?";
-    const url = window.location.href;
-
-    switch (platform) {
-      case 'linkedin':
-        shareToLinkedIn(shareText);
-        break;
-      case 'twitter':
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`, '_blank');
-        break;
-      case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-        break;
-      case 'email':
-        window.location.href = `mailto:?subject=Property Wordle Leaderboard&body=${encodeURIComponent(shareText + '\n\n' + url)}`;
-        break;
-    }
-  };
-
   if (isLoading) return (
     <div className="flex justify-center items-center min-h-screen">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -92,45 +63,7 @@ const Leaderboard = () => {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Leaderboard</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" size="icon">
-            <Settings className="h-6 w-6" />
-          </Button>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={() => handleShare('linkedin')}
-            >
-              <LinkedinIcon className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={() => handleShare('twitter')}
-            >
-              <Twitter className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={() => handleShare('facebook')}
-            >
-              <Facebook className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={() => handleShare('email')}
-            >
-              <Mail className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
+      <LeaderboardHeader />
       <div className="mb-4">
         <Input
           placeholder="Search by username..."
@@ -139,86 +72,12 @@ const Leaderboard = () => {
           className="max-w-sm"
         />
       </div>
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead 
-                className="w-12 text-center cursor-pointer"
-                onClick={() => requestSort('username')}
-              >
-                Username {sortConfig?.key === 'username' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-              </TableHead>
-              <TableHead 
-                className="text-right cursor-pointer"
-                onClick={() => requestSort('avg_completion_time')}
-              >
-                Average Time {sortConfig?.key === 'avg_completion_time' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-              </TableHead>
-              <TableHead 
-                className="text-right cursor-pointer"
-                onClick={() => requestSort('games_played')}
-              >
-                Number of Games {sortConfig?.key === 'games_played' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-              </TableHead>
-              <TableHead 
-                className="text-right cursor-pointer"
-                onClick={() => requestSort('avg_attempts')}
-              >
-                Average Attempts {sortConfig?.key === 'avg_attempts' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-              </TableHead>
-              <TableHead 
-                className="text-right cursor-pointer"
-                onClick={() => requestSort('best_completion_time')}
-              >
-                Best Time {sortConfig?.key === 'best_completion_time' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-              </TableHead>
-              <TableHead 
-                className="text-right cursor-pointer"
-                onClick={() => requestSort('best_score')}
-              >
-                Best Attempts {sortConfig?.key === 'best_score' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredData.map((entry, index) => (
-              <TableRow key={index} className={index < 3 ? "bg-yellow-50" : ""}>
-                <TableCell className="font-medium">{entry.username}</TableCell>
-                <TableCell className="text-right">
-                  {formatTime(entry.avg_completion_time)}
-                </TableCell>
-                <TableCell className="text-right">
-                  {entry.games_played}
-                </TableCell>
-                <TableCell className="text-right">
-                  {entry.avg_attempts?.toFixed(1)}
-                </TableCell>
-                <TableCell className="text-right">
-                  {formatTime(entry.best_completion_time)}
-                </TableCell>
-                <TableCell className="text-right">
-                  {entry.best_score}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="mt-12 bg-gray-50 rounded-lg p-8 text-center">
-        <h2 className="text-2xl font-semibold mb-4">Discover Click Media Group</h2>
-        <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-          Want to make your property listings as engaging as this game? 
-          Click Media Group specializes in creating scroll-stopping content 
-          that captures attention and drives results.
-        </p>
-        <Button 
-          className="bg-[#00A5E5] hover:bg-[#0094CE] text-white"
-          onClick={() => window.open('https://www.clickmediagroup.co.uk', '_blank')}
-        >
-          Learn More About Click
-        </Button>
-      </div>
+      <LeaderboardTable 
+        data={filteredData}
+        sortConfig={sortConfig}
+        onRequestSort={requestSort}
+      />
+      <ClickPromotion />
     </div>
   );
 };
