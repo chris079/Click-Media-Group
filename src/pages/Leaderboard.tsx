@@ -9,7 +9,10 @@ const Leaderboard = () => {
   const [sortConfig, setSortConfig] = useState<{
     key: string;
     direction: 'asc' | 'desc';
-  } | null>(null);
+  }>({
+    key: 'completion_time',
+    direction: 'asc'
+  });
 
   const { data: leaderboardData, isLoading: isLoadingLeaderboard } = useQuery({
     queryKey: ['leaderboard'],
