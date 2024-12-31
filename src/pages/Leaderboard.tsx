@@ -5,7 +5,7 @@ import { formatDuration } from 'date-fns';
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Settings, Share } from 'lucide-react';
+import { Settings, Share, Facebook, Twitter, Mail, LinkedinIcon } from 'lucide-react';
 import { shareToLinkedIn } from '@/utils/shareUtils';
 
 const Leaderboard = () => {
@@ -64,6 +64,26 @@ const Leaderboard = () => {
       }))
     : [];
 
+  const handleShare = (platform: 'linkedin' | 'twitter' | 'facebook' | 'email') => {
+    const shareText = "Check out the Property Wordle leaderboard! Can you make it to the top?";
+    const url = window.location.href;
+
+    switch (platform) {
+      case 'linkedin':
+        shareToLinkedIn(shareText);
+        break;
+      case 'twitter':
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`, '_blank');
+        break;
+      case 'facebook':
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+        break;
+      case 'email':
+        window.location.href = `mailto:?subject=Property Wordle Leaderboard&body=${encodeURIComponent(shareText + '\n\n' + url)}`;
+        break;
+    }
+  };
+
   if (isLoading) return (
     <div className="flex justify-center items-center min-h-screen">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -78,17 +98,36 @@ const Leaderboard = () => {
           <Button variant="outline" size="icon">
             <Settings className="h-6 w-6" />
           </Button>
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2"
-            onClick={() => {
-              const shareText = "Check out the Property Wordle leaderboard! Can you make it to the top?";
-              shareToLinkedIn(shareText);
-            }}
-          >
-            <Share className="h-5 w-5" />
-            Share
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={() => handleShare('linkedin')}
+            >
+              <LinkedinIcon className="h-5 w-5" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={() => handleShare('twitter')}
+            >
+              <Twitter className="h-5 w-5" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={() => handleShare('facebook')}
+            >
+              <Facebook className="h-5 w-5" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={() => handleShare('email')}
+            >
+              <Mail className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
 
