@@ -3,7 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 const TermsAndConditions = () => {
   return (
-    <ScrollArea className="h-[600px] w-full rounded-md border p-6 bg-white">
+    <ScrollArea className="h-[calc(100vh-12rem)] w-full rounded-md border p-6 bg-white">
       <div className="space-y-6">
         <h2 className="text-2xl font-bold text-gray-900">Terms and Conditions for Email and Username Data Usage</h2>
         <p className="text-gray-600">By participating in the Click Wordle game and providing your email address and username, you agree to the following terms and conditions:</p>
