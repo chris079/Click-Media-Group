@@ -24,10 +24,15 @@ interface LeaderboardTableProps {
 const LeaderboardTable = ({ data, sortConfig, onRequestSort }: LeaderboardTableProps) => {
   const formatTime = (seconds: number) => {
     if (!seconds) return 'N/A';
-    if (seconds < 60) return `${Math.floor(seconds)} seconds`;
-    return formatDuration({
-      seconds: Math.floor(seconds)
-    }, { format: ['minutes', 'seconds'] });
+    
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    
+    if (minutes === 0) {
+      return `${remainingSeconds} seconds`;
+    }
+    
+    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${remainingSeconds} seconds`;
   };
 
   const getMedalColor = (index: number) => {
