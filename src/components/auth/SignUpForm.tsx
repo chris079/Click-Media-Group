@@ -7,6 +7,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import UsernameInput from '../UsernameInput';
+import { validateEmail } from '../signup/SignUpValidation';
+import { validateSignUp } from '../signup/SignUpValidation';
 
 interface SignUpFormProps {
   email: string;
@@ -16,6 +18,8 @@ interface SignUpFormProps {
   onSuccess: () => void;
   currentScore?: number;
   word?: string;
+  completionTime?: string;
+  gameWon?: boolean;
 }
 
 const SignUpForm = ({
@@ -25,10 +29,13 @@ const SignUpForm = ({
   isSubmitting,
   onSuccess,
   currentScore,
-  word
+  word,
+  completionTime,
+  gameWon
 }: SignUpFormProps) => {
   const [username, setUsername] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,23 +45,31 @@ const SignUpForm = ({
     }
 
     try {
-      const { data: existingProfiles, error: checkError } = await supabase
-        .from('profiles')
-        .select('username, email')
-        .or(`username.eq.${username},email.eq.${email}`);
-
-      if (checkError) throw checkError;
-
-      if (existingProfiles && existingProfiles.length > 0) {
-        const existingProfile = existingProfiles[0];
-        if (existingProfile.username === username) {
-          toast.error("This username is already taken. Please choose another one.");
-        } else if (existingProfile.email === email) {
-          toast.error("This email is already registered. Please use another email.");
-        }
+      // First validate email format and domain
+      const isEmailValid = await validateEmail(email);
+      if (!isEmailValid) {
+        toast.error("Please enter a valid email address");
         return;
       }
 
+      // Check username and email combination
+      const { isExisting, shouldUpdate } = await validateSignUp(email, username);
+
+      if (isExisting && !shouldUpdate) {
+        // Username and email match - welcome back!
+        toast.success("Welcome back!");
+        onSuccess();
+        return;
+      }
+
+      if (isExisting && shouldUpdate) {
+        // Username exists but email doesn't match
+        toast.error("This username is already taken by another user. Please choose a different username.");
+        setShowUpdatePrompt(true);
+        return;
+      }
+
+      // Create new profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .insert([
@@ -62,7 +77,6 @@ const SignUpForm = ({
             username,
             email,
             terms_accepted: termsAccepted,
-            email_verified: false
           }
         ])
         .select()
@@ -70,18 +84,7 @@ const SignUpForm = ({
 
       if (profileError) throw profileError;
 
-      const { error: authError } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          data: {
-            username
-          }
-        }
-      });
-
-      if (authError) throw authError;
-
-      if (currentScore && word && profile) {
+      if (currentScore !== undefined && word && profile) {
         const { error: scoreError } = await supabase
           .from('scores')
           .insert([
@@ -89,19 +92,40 @@ const SignUpForm = ({
               profile_id: profile.id,
               word,
               attempts: currentScore,
+              completion_time: completionTime,
+              is_win: gameWon
             }
           ]);
 
         if (scoreError) throw scoreError;
       }
 
-      toast.success("Check your email for the magic link to complete registration!");
+      toast.success("Profile created successfully!");
       onSuccess();
     } catch (error: any) {
       console.error('Error during signup:', error);
       toast.error(error.message || "An error occurred during signup");
     }
   };
+
+  if (showUpdatePrompt) {
+    return (
+      <div className="space-y-4">
+        <Alert variant="destructive">
+          <AlertDescription>
+            This username is already associated with a different email address. 
+            Please choose a different username to continue.
+          </AlertDescription>
+        </Alert>
+        <Button 
+          onClick={() => setShowUpdatePrompt(false)} 
+          className="w-full"
+        >
+          Choose Different Username
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSignUp} className="space-y-4">

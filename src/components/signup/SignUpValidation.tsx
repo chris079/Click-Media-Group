@@ -15,12 +15,6 @@ export const validateEmail = async (email: string) => {
 };
 
 export const validateSignUp = async (email: string, username: string) => {
-  // First validate email format and domain
-  const isEmailValid = await validateEmail(email);
-  if (!isEmailValid) {
-    throw new Error("Please enter a valid email address");
-  }
-
   // Check if username exists and get associated email
   const { data: existingProfile } = await supabase
     .from('profiles')

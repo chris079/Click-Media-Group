@@ -61,6 +61,8 @@ const SignUpDialog = ({
           onSuccess={onSuccess}
           currentScore={currentScore}
           word={word}
+          completionTime={completionTime}
+          gameWon={gameWon}
         />
       </DialogContent>
     </Dialog>
