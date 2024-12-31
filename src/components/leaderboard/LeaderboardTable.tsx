@@ -1,6 +1,5 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatDuration } from 'date-fns';
 import { Award } from 'lucide-react';
 
 interface LeaderboardEntry {
@@ -29,10 +28,10 @@ const LeaderboardTable = ({ data, sortConfig, onRequestSort }: LeaderboardTableP
     const remainingSeconds = Math.floor(seconds % 60);
     
     if (minutes === 0) {
-      return `${remainingSeconds} seconds`;
+      return `${remainingSeconds}s`;
     }
     
-    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${remainingSeconds} seconds`;
+    return `${minutes}m ${remainingSeconds}s`;
   };
 
   const getMedalColor = (index: number) => {
@@ -46,10 +45,9 @@ const LeaderboardTable = ({ data, sortConfig, onRequestSort }: LeaderboardTableP
 
   const getRankDisplay = (index: number) => {
     const rank = index + 1;
-    const suffix = ['st', 'nd', 'rd'][index] || 'th';
     return (
-      <div className="flex items-center gap-1">
-        <span>{rank}{suffix}</span>
+      <div className="flex items-start gap-2">
+        <span>{rank}</span>
         {index < 3 && (
           <Award className={`h-4 w-4 ${getMedalColor(index)}`} />
         )}
@@ -57,77 +55,69 @@ const LeaderboardTable = ({ data, sortConfig, onRequestSort }: LeaderboardTableP
     );
   };
 
+  const capitalizeFirstLetter = (string: string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+  };
+
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-16">Rank</TableHead>
+            <TableHead className="w-16 text-left">Rank</TableHead>
             <TableHead 
-              className="cursor-pointer group"
+              className="cursor-pointer text-left"
               onClick={() => onRequestSort('username')}
             >
-              <div className="flex items-center gap-2">
-                Username 
-                <span className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {sortConfig?.key === 'username' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
-                </span>
-              </div>
+              Username 
+              <span className="text-gray-400 ml-1">
+                {sortConfig?.key === 'username' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+              </span>
             </TableHead>
             <TableHead 
-              className="text-right cursor-pointer group"
+              className="text-left cursor-pointer"
               onClick={() => onRequestSort('avg_completion_time')}
             >
-              <div className="flex items-center justify-end gap-2">
-                Average Time 
-                <span className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {sortConfig?.key === 'avg_completion_time' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
-                </span>
-              </div>
+              Average Time 
+              <span className="text-gray-400 ml-1">
+                {sortConfig?.key === 'avg_completion_time' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+              </span>
             </TableHead>
             <TableHead 
-              className="text-right cursor-pointer group"
+              className="text-left cursor-pointer"
               onClick={() => onRequestSort('games_played')}
             >
-              <div className="flex items-center justify-end gap-2">
-                Games Played 
-                <span className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {sortConfig?.key === 'games_played' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
-                </span>
-              </div>
+              Games Played 
+              <span className="text-gray-400 ml-1">
+                {sortConfig?.key === 'games_played' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+              </span>
             </TableHead>
             <TableHead 
-              className="text-right cursor-pointer group"
+              className="text-left cursor-pointer"
               onClick={() => onRequestSort('avg_attempts')}
             >
-              <div className="flex items-center justify-end gap-2">
-                Average Attempts 
-                <span className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {sortConfig?.key === 'avg_attempts' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
-                </span>
-              </div>
+              Average Attempts 
+              <span className="text-gray-400 ml-1">
+                {sortConfig?.key === 'avg_attempts' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+              </span>
             </TableHead>
             <TableHead 
-              className="text-right cursor-pointer group"
+              className="text-left cursor-pointer"
               onClick={() => onRequestSort('best_completion_time')}
             >
-              <div className="flex items-center justify-end gap-2">
-                Best Time 
-                <span className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {sortConfig?.key === 'best_completion_time' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
-                </span>
-              </div>
+              Best Time 
+              <span className="text-gray-400 ml-1">
+                {sortConfig?.key === 'best_completion_time' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+              </span>
             </TableHead>
             <TableHead 
-              className="text-right cursor-pointer group"
+              className="text-left cursor-pointer"
               onClick={() => onRequestSort('best_score')}
             >
-              <div className="flex items-center justify-end gap-2">
-                Best Attempts 
-                <span className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {sortConfig?.key === 'best_score' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
-                </span>
-              </div>
+              Best Attempts 
+              <span className="text-gray-400 ml-1">
+                {sortConfig?.key === 'best_score' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+              </span>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -135,20 +125,22 @@ const LeaderboardTable = ({ data, sortConfig, onRequestSort }: LeaderboardTableP
           {data.map((entry, index) => (
             <TableRow key={index}>
               <TableCell>{getRankDisplay(index)}</TableCell>
-              <TableCell className="font-medium">{entry.username}</TableCell>
-              <TableCell className="text-right">
+              <TableCell className="font-medium">
+                {capitalizeFirstLetter(entry.username)}
+              </TableCell>
+              <TableCell>
                 {formatTime(entry.avg_completion_time)}
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell>
                 {entry.games_played}
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell>
                 {Math.round(entry.avg_attempts)}
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell>
                 {formatTime(entry.best_completion_time)}
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell>
                 {Math.round(entry.best_score)}
               </TableCell>
             </TableRow>

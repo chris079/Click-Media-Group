@@ -1,6 +1,5 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatDuration } from 'date-fns';
 import { Award } from 'lucide-react';
 
 interface CompanyStats {
@@ -23,17 +22,20 @@ interface CompanyStatsTableProps {
 const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTableProps) => {
   const formatTime = (seconds: number) => {
     if (!seconds) return 'N/A';
-    if (seconds < 60) return `${Math.floor(seconds)} seconds`;
-    return formatDuration({
-      seconds: Math.floor(seconds)
-    }, { format: ['minutes', 'seconds'] });
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    if (minutes === 0) return `${remainingSeconds}s`;
+    return `${minutes}m ${remainingSeconds}s`;
   };
 
   const formatCompanyName = (company: string) => {
     return company
       .replace(/\.(com|co\.uk|net|org)$/i, '')  // Remove common domain extensions
       .replace(/\s+/g, ' ')  // Remove extra spaces
-      .trim();
+      .trim()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   };
 
   const getMedalColor = (index: number) => {
@@ -47,10 +49,9 @@ const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTabl
 
   const getRankDisplay = (index: number) => {
     const rank = index + 1;
-    const suffix = ['st', 'nd', 'rd'][index] || 'th';
     return (
-      <div className="flex items-center gap-1">
-        <span>{rank}{suffix}</span>
+      <div className="flex items-start gap-2">
+        <span>{rank}</span>
         {index < 3 && (
           <Award className={`h-4 w-4 ${getMedalColor(index)}`} />
         )}
@@ -63,50 +64,42 @@ const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTabl
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-16">Rank</TableHead>
+            <TableHead className="w-16 text-left">Rank</TableHead>
             <TableHead 
-              className="cursor-pointer group"
+              className="cursor-pointer text-left"
               onClick={() => onRequestSort('company')}
             >
-              <div className="flex items-center gap-2">
-                Company 
-                <span className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {sortConfig?.key === 'company' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
-                </span>
-              </div>
+              Company 
+              <span className="text-gray-400 ml-1">
+                {sortConfig?.key === 'company' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+              </span>
             </TableHead>
             <TableHead 
-              className="text-right cursor-pointer group"
+              className="text-left cursor-pointer"
               onClick={() => onRequestSort('avg_completion_time')}
             >
-              <div className="flex items-center justify-end gap-2">
-                Average Time 
-                <span className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {sortConfig?.key === 'avg_completion_time' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
-                </span>
-              </div>
+              Average Time 
+              <span className="text-gray-400 ml-1">
+                {sortConfig?.key === 'avg_completion_time' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+              </span>
             </TableHead>
             <TableHead 
-              className="text-right cursor-pointer group"
+              className="text-left cursor-pointer"
               onClick={() => onRequestSort('games_played')}
             >
-              <div className="flex items-center justify-end gap-2">
-                Games Played 
-                <span className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {sortConfig?.key === 'games_played' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
-                </span>
-              </div>
+              Games Played 
+              <span className="text-gray-400 ml-1">
+                {sortConfig?.key === 'games_played' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+              </span>
             </TableHead>
             <TableHead 
-              className="text-right cursor-pointer group"
+              className="text-left cursor-pointer"
               onClick={() => onRequestSort('avg_attempts')}
             >
-              <div className="flex items-center justify-end gap-2">
-                Average Attempts 
-                <span className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {sortConfig?.key === 'avg_attempts' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
-                </span>
-              </div>
+              Average Attempts 
+              <span className="text-gray-400 ml-1">
+                {sortConfig?.key === 'avg_attempts' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+              </span>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -114,14 +107,16 @@ const CompanyStatsTable = ({ data, sortConfig, onRequestSort }: CompanyStatsTabl
           {data.map((entry, index) => (
             <TableRow key={index}>
               <TableCell>{getRankDisplay(index)}</TableCell>
-              <TableCell className="font-medium">{formatCompanyName(entry.company)}</TableCell>
-              <TableCell className="text-right">
+              <TableCell className="font-medium">
+                {formatCompanyName(entry.company)}
+              </TableCell>
+              <TableCell>
                 {formatTime(entry.avg_completion_time)}
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell>
                 {entry.games_played}
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell>
                 {Math.round(entry.avg_attempts)}
               </TableCell>
             </TableRow>

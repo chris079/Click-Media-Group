@@ -1,11 +1,10 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatDuration } from 'date-fns';
 import { Award } from 'lucide-react';
 
 interface TodayScore {
   username: string;
-  completion_time: number;
+  completion_time: string;
   attempts: number;
   word: string;
 }
@@ -20,12 +19,26 @@ interface TodayScoresTableProps {
 }
 
 const TodayScoresTable = ({ data, sortConfig, onRequestSort }: TodayScoresTableProps) => {
-  const formatTime = (seconds: number) => {
-    if (!seconds) return 'N/A';
-    if (seconds < 60) return `${Math.floor(seconds)} seconds`;
-    return formatDuration({
-      seconds: Math.floor(seconds)
-    }, { format: ['minutes', 'seconds'] });
+  const formatTime = (timeString: string) => {
+    if (!timeString) return 'N/A';
+    
+    // Parse the interval string (e.g., "00:01:30" or "90 seconds")
+    let totalSeconds: number;
+    if (timeString.includes(':')) {
+      const [hours, minutes, seconds] = timeString.split(':').map(Number);
+      totalSeconds = hours * 3600 + minutes * 60 + seconds;
+    } else {
+      totalSeconds = parseInt(timeString.split(' ')[0]);
+    }
+    
+    const minutes = Math.floor(totalSeconds / 60);
+    const remainingSeconds = Math.floor(totalSeconds % 60);
+    
+    if (minutes === 0) {
+      return `${remainingSeconds}s`;
+    }
+    
+    return `${minutes}m ${remainingSeconds}s`;
   };
 
   const getMedalColor = (index: number) => {
@@ -39,10 +52,9 @@ const TodayScoresTable = ({ data, sortConfig, onRequestSort }: TodayScoresTableP
 
   const getRankDisplay = (index: number) => {
     const rank = index + 1;
-    const suffix = ['st', 'nd', 'rd'][index] || 'th';
     return (
-      <div className="flex items-center gap-1">
-        <span>{rank}{suffix}</span>
+      <div className="flex items-start gap-2">
+        <span>{rank}</span>
         {index < 3 && (
           <Award className={`h-4 w-4 ${getMedalColor(index)}`} />
         )}
@@ -50,44 +62,42 @@ const TodayScoresTable = ({ data, sortConfig, onRequestSort }: TodayScoresTableP
     );
   };
 
+  const capitalizeFirstLetter = (string: string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+  };
+
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-16">Rank</TableHead>
+            <TableHead className="w-16 text-left">Rank</TableHead>
             <TableHead 
-              className="cursor-pointer group"
+              className="cursor-pointer text-left"
               onClick={() => onRequestSort('username')}
             >
-              <div className="flex items-center gap-2">
-                Username 
-                <span className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {sortConfig?.key === 'username' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
-                </span>
-              </div>
+              Username 
+              <span className="text-gray-400 ml-1">
+                {sortConfig?.key === 'username' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+              </span>
             </TableHead>
             <TableHead 
-              className="text-right cursor-pointer group"
+              className="text-left cursor-pointer"
               onClick={() => onRequestSort('completion_time')}
             >
-              <div className="flex items-center justify-end gap-2">
-                Time 
-                <span className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {sortConfig?.key === 'completion_time' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
-                </span>
-              </div>
+              Time 
+              <span className="text-gray-400 ml-1">
+                {sortConfig?.key === 'completion_time' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+              </span>
             </TableHead>
             <TableHead 
-              className="text-right cursor-pointer group"
+              className="text-left cursor-pointer"
               onClick={() => onRequestSort('attempts')}
             >
-              <div className="flex items-center justify-end gap-2">
-                Attempts 
-                <span className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {sortConfig?.key === 'attempts' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
-                </span>
-              </div>
+              Attempts 
+              <span className="text-gray-400 ml-1">
+                {sortConfig?.key === 'attempts' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+              </span>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -96,12 +106,12 @@ const TodayScoresTable = ({ data, sortConfig, onRequestSort }: TodayScoresTableP
             <TableRow key={index}>
               <TableCell>{getRankDisplay(index)}</TableCell>
               <TableCell className="font-medium">
-                {entry.username}
+                {capitalizeFirstLetter(entry.username)}
               </TableCell>
-              <TableCell className="text-right">
-                {formatTime(Number(entry.completion_time))}
+              <TableCell>
+                {formatTime(entry.completion_time)}
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell>
                 {Math.round(entry.attempts)}
               </TableCell>
             </TableRow>
