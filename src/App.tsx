@@ -1,28 +1,25 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Leaderboard from "./pages/Leaderboard";
-import Settings from "./pages/Settings";
+import { Toaster as SonnerToaster } from "sonner";
+import Index from '@/pages/Index';
+import Settings from '@/pages/Settings';
+import Leaderboard from '@/pages/Leaderboard';
+import './App.css';
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+function App() {
+  return (
+    <Router>
+      <div className="App">
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
         </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+        <Toaster />
+        <SonnerToaster position="top-center" />
+      </div>
+    </Router>
+  );
+}
 
 export default App;
