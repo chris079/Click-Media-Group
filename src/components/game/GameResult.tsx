@@ -66,24 +66,6 @@ const GameResult = ({ gameOver, gameWon, wordOfTheDay, completionTime, signedUp 
               View Leaderboard
             </Button>
           )}
-          
-          <div className="space-y-4">
-            <p className="text-lg font-medium">Share with colleagues and friends:</p>
-            <div className="flex justify-center gap-3">
-              <Button onClick={() => handleShare('linkedin')} variant="outline" size="icon">
-                <LinkedinIcon className="w-5 h-5" />
-              </Button>
-              <Button onClick={() => handleShare('twitter')} variant="outline" size="icon">
-                <Twitter className="w-5 h-5" />
-              </Button>
-              <Button onClick={() => handleShare('facebook')} variant="outline" size="icon">
-                <Facebook className="w-5 h-5" />
-              </Button>
-              <Button onClick={() => handleShare('email')} variant="outline" size="icon">
-                <Mail className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
         </>
       ) : (
         <div className="animate-fade-in space-y-4">
@@ -92,6 +74,24 @@ const GameResult = ({ gameOver, gameWon, wordOfTheDay, completionTime, signedUp 
           <div className="animate-bounce">😔</div>
         </div>
       )}
+
+      <div className="space-y-4">
+        <p className="text-lg font-medium">Share with colleagues and friends:</p>
+        <div className="flex justify-center gap-3">
+          <Button onClick={() => handleShare('linkedin')} variant="outline" size="icon">
+            <LinkedinIcon className="w-5 h-5" />
+          </Button>
+          <Button onClick={() => handleShare('twitter')} variant="outline" size="icon">
+            <Twitter className="w-5 h-5" />
+          </Button>
+          <Button onClick={() => handleShare('facebook')} variant="outline" size="icon">
+            <Facebook className="w-5 h-5" />
+          </Button>
+          <Button onClick={() => handleShare('email')} variant="outline" size="icon">
+            <Mail className="w-5 h-5" />
+          </Button>
+        </div>
+      </div>
 
       <div className="mt-8 p-6 bg-gray-50 rounded-lg">
         <h1 className="text-2xl font-bold mb-4">Ready to Take Your Property Marketing to the Next Level?</h1>
