@@ -15,22 +15,35 @@ export const validateEmail = async (email: string) => {
 };
 
 export const validateSignUp = async (email: string, username: string) => {
-  // Check if username exists and get associated email
-  const { data: existingProfile } = await supabase
-    .from('profiles')
-    .select('email')
-    .eq('username', username.charAt(0).toUpperCase() + username.slice(1))
-    .maybeSingle();
+  try {
+    // First check if username exists (case insensitive)
+    const { data: existingProfiles, error } = await supabase
+      .from('profiles')
+      .select('email, username')
+      .ilike('username', username);
 
-  if (!existingProfile) {
-    return { isExisting: false, shouldUpdate: false };
+    if (error) throw error;
+
+    // No existing profiles found
+    if (!existingProfiles || existingProfiles.length === 0) {
+      return { isExisting: false, shouldUpdate: false };
+    }
+
+    // Check if there's an exact match with the same email
+    const exactMatch = existingProfiles.find(
+      profile => 
+        profile.username.toLowerCase() === username.toLowerCase() && 
+        profile.email === email
+    );
+
+    if (exactMatch) {
+      return { isExisting: true, shouldUpdate: false };
+    }
+
+    // Username exists but with different email or case
+    return { isExisting: true, shouldUpdate: true };
+  } catch (error) {
+    console.error('Error validating signup:', error);
+    throw error;
   }
-
-  // If username exists, check if email matches
-  if (existingProfile.email === email) {
-    return { isExisting: true, shouldUpdate: false };
-  }
-
-  // Username exists but email doesn't match
-  return { isExisting: true, shouldUpdate: true };
 };

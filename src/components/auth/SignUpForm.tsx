@@ -7,8 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import UsernameInput from '../UsernameInput';
-import { validateEmail } from '../signup/SignUpValidation';
-import { validateSignUp } from '../signup/SignUpValidation';
+import { validateEmail, validateSignUp } from '../signup/SignUpValidation';
 
 interface SignUpFormProps {
   email: string;
@@ -64,17 +63,18 @@ const SignUpForm = ({
 
       if (isExisting && shouldUpdate) {
         // Username exists but email doesn't match
-        toast.error("This username is already taken by another user. Please choose a different username.");
+        toast.error("This username is already taken. Please choose a different username.");
         setShowUpdatePrompt(true);
         return;
       }
 
-      // Create new profile
+      // Create new profile with capitalized username
+      const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .insert([
           {
-            username,
+            username: capitalizedUsername,
             email,
             terms_accepted: termsAccepted,
           }
@@ -82,7 +82,14 @@ const SignUpForm = ({
         .select()
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        if (profileError.code === '23505') {
+          toast.error("This username is already taken. Please choose a different username.");
+          setShowUpdatePrompt(true);
+          return;
+        }
+        throw profileError;
+      }
 
       if (currentScore !== undefined && word && profile) {
         const { error: scoreError } = await supabase
@@ -113,8 +120,7 @@ const SignUpForm = ({
       <div className="space-y-4">
         <Alert variant="destructive">
           <AlertDescription>
-            This username is already associated with a different email address. 
-            Please choose a different username to continue.
+            This username is already taken. Please choose a different username to continue.
           </AlertDescription>
         </Alert>
         <Button 
