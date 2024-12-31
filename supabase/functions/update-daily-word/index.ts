@@ -1,40 +1,53 @@
-// Import from specific URLs for Deno compatibility
+// Follow Deno Edge Function conventions
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { propertyWords } from "../../../src/data/propertyWords";
 
-// Since we can't import directly from the src folder in Edge Functions,
-// we'll need to include the words directly here
-const propertyWords = [
-  "ALIGN", "BLOCK", "COLOR", "FLOAT", "FOCUS", 
-  "HOVER", "INDEX", "INSET", "MEDIA", "ORDER",
-  "SCALE", "STACK", "STYLE", "TABLE", "WIDTH"
-];
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+// Handle CORS preflight requests
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
 
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-
-Deno.cron("Update Daily Word", "0 0 * * *", async () => {
   try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Get a random word from the property words list
     const randomIndex = Math.floor(Math.random() * propertyWords.length);
-    const newWord = propertyWords[randomIndex];
-    
-    // Store the new word in the database
+    const newWord = propertyWords[randomIndex].toUpperCase();
+
+    // Insert the new word for today
     const { error } = await supabase
-      .from('daily_word')
-      .upsert({ 
-        id: 1, 
-        word: newWord,
-        updated_at: new Date().toISOString()
-      });
+      .from('daily_words')
+      .insert([{ word: newWord }]);
 
-    if (error) {
-      console.error('Error updating daily word:', error);
-      return;
-    }
+    if (error) throw error;
 
-    console.log('Daily word updated successfully');
+    console.log('Daily word updated successfully:', newWord);
+    
+    return new Response(
+      JSON.stringify({ message: 'Daily word updated successfully' }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
+      }
+    );
+
   } catch (error) {
-    console.error('Error in update-daily-word function:', error);
+    console.error('Error updating daily word:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      }
+    );
   }
 });
