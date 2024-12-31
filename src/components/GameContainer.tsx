@@ -62,6 +62,8 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
     fetchDailyWord();
   }, []);
 
+  const showKeyboard = !gameOver || gameWon;
+
   return (
     <div className={`max-w-2xl mx-auto ${isShaking ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
       <style>
@@ -89,56 +91,47 @@ const GameContainer = ({ session, onShowSignUp }: GameContainerProps) => {
         signedUp={signedUp}
       />
 
-      <GameKeyboardHandler
-        onKeyPress={(key) => {
-          if (!showSignUp && !gameOver && currentGuess.length < 5) {
-            setCurrentGuess(prev => prev + key);
-          }
-        }}
-        onEnter={() => {
-          if (!showSignUp && !gameOver && currentGuess.length === 5) {
-            submitGuess();
-          }
-        }}
-        onDelete={() => {
-          if (!showSignUp && !gameOver) {
-            setCurrentGuess(prev => prev.slice(0, -1));
-          }
-        }}
-        disabled={showSignUp || gameOver}
-      />
+      {showKeyboard && (
+        <>
+          <GameKeyboardHandler
+            onKeyPress={(key) => {
+              if (!showSignUp && !gameOver && currentGuess.length < 5) {
+                setCurrentGuess(prev => prev + key);
+              }
+            }}
+            onEnter={() => {
+              if (!showSignUp && !gameOver && currentGuess.length === 5) {
+                submitGuess();
+              }
+            }}
+            onDelete={() => {
+              if (!showSignUp && !gameOver) {
+                setCurrentGuess(prev => prev.slice(0, -1));
+              }
+            }}
+            disabled={showSignUp || gameOver}
+          />
 
-      <Keyboard
-        onKeyPress={(key) => {
-          if (!showSignUp && !gameOver && currentGuess.length < 5) {
-            setCurrentGuess(prev => prev + key);
-          }
-        }}
-        onEnter={() => {
-          if (!showSignUp && !gameOver && currentGuess.length === 5) {
-            submitGuess();
-          }
-        }}
-        onDelete={() => {
-          if (!showSignUp && !gameOver) {
-            setCurrentGuess(prev => prev.slice(0, -1));
-          }
-        }}
-        usedLetters={usedLetters}
-      />
-
-      <SignUpDialog
-        open={showSignUp}
-        onOpenChange={setShowSignUp}
-        onSuccess={() => {
-          setShowSignUp(false);
-          setSignedUp(true);
-        }}
-        currentScore={guesses.length}
-        word={wordOfTheDay}
-        completionTime={completionTime}
-        gameWon={gameWon}
-      />
+          <Keyboard
+            onKeyPress={(key) => {
+              if (!showSignUp && !gameOver && currentGuess.length < 5) {
+                setCurrentGuess(prev => prev + key);
+              }
+            }}
+            onEnter={() => {
+              if (!showSignUp && !gameOver && currentGuess.length === 5) {
+                submitGuess();
+              }
+            }}
+            onDelete={() => {
+              if (!showSignUp && !gameOver) {
+                setCurrentGuess(prev => prev.slice(0, -1));
+              }
+            }}
+            usedLetters={usedLetters}
+          />
+        </>
+      )}
     </div>
   );
 };

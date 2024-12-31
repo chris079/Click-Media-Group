@@ -66,6 +66,24 @@ const GameResult = ({ gameOver, gameWon, wordOfTheDay, completionTime, signedUp 
               View Leaderboard
             </Button>
           )}
+          
+          <div className="space-y-4">
+            <p className="text-lg font-medium">Share with colleagues and friends:</p>
+            <div className="flex justify-center gap-3">
+              <Button onClick={() => handleShare('linkedin')} variant="outline" size="icon">
+                <LinkedinIcon className="w-5 h-5" />
+              </Button>
+              <Button onClick={() => handleShare('twitter')} variant="outline" size="icon">
+                <Twitter className="w-5 h-5" />
+              </Button>
+              <Button onClick={() => handleShare('facebook')} variant="outline" size="icon">
+                <Facebook className="w-5 h-5" />
+              </Button>
+              <Button onClick={() => handleShare('email')} variant="outline" size="icon">
+                <Mail className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
         </>
       ) : (
         <div className="animate-fade-in space-y-4">
@@ -75,34 +93,16 @@ const GameResult = ({ gameOver, gameWon, wordOfTheDay, completionTime, signedUp 
         </div>
       )}
 
-      <div className="space-y-4">
-        <p className="text-lg font-medium">Share with colleagues and friends:</p>
-        <div className="flex justify-center gap-3">
-          <Button onClick={() => handleShare('linkedin')} variant="outline" size="icon">
-            <LinkedinIcon className="w-5 h-5" />
-          </Button>
-          <Button onClick={() => handleShare('twitter')} variant="outline" size="icon">
-            <Twitter className="w-5 h-5" />
-          </Button>
-          <Button onClick={() => handleShare('facebook')} variant="outline" size="icon">
-            <Facebook className="w-5 h-5" />
-          </Button>
-          <Button onClick={() => handleShare('email')} variant="outline" size="icon">
-            <Mail className="w-5 h-5" />
-          </Button>
-        </div>
-      </div>
-
       <div className="mt-8 p-6 bg-gray-50 rounded-lg">
-        <h3 className="text-xl font-semibold mb-4">Find out more about Click</h3>
-        <p className="text-gray-600 mb-4">
-          Discover how we make your property listings truly stand out in the market!
+        <h1 className="text-2xl font-bold mb-4">Ready to Take Your Property Marketing to the Next Level?</h1>
+        <p className="text-gray-600 mb-6">
+          Discover how Click's innovative visuals and cutting edge solutions can make your properties stand out and sell faster.
         </p>
         <Button 
           onClick={() => window.open('https://www.clickmediagroup.co.uk', '_blank')}
           className="bg-[#00A5E5] hover:bg-[#0094CE] text-white"
         >
-          Visit Click Media Group
+          Learn More at Click
         </Button>
       </div>
     </div>
